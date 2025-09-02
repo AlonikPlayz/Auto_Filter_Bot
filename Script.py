@@ -222,7 +222,13 @@ Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
 <b><blockquote>𝙿𝚘𝚠𝚎𝚛e𝚍 𝙱𝚢 ➥ <a href="https://t.me/MovieHuntZone">
 𝐔𝐏𝐃𝐀𝐓𝐄 𝐂𝐇𝐇𝐀𝐍𝐄𝐋
 </a></blockquote></b><b><blockquote>𝙿𝚘𝚠𝚎𝚛e𝚍 𝙱𝚢 ➥ <a href="https://t.me/+SzLcULYfU8s4OTM1">
-@𝐌𝐎𝐕𝐈𝐄 𝐑𝐄𝐐𝐔𝐄𝐒𝐓 𝐆𝐑𝐎𝐔𝐏</a></blockquote></b>
+@𝐌𝐎𝐕𝐈𝐄 𝐑𝐄𝐐𝐔𝐄𝐒𝐓 𝐆𝐑𝐎𝐔𝐏</a></blockquote></b>"""
+
+
+    MOVIE_UPDATE_NOTIFY_TXT = """
+</b><a href={poster_url}>📥</a><a href={imdb_url}>New {tag} Added</a></b>
+
+<blockquote>✨ ᴛɪᴛʟᴇ : <code>{filename}</code>
 
 
 🎭 ɢᴇɴʀᴇs : <b>{genres}</b>

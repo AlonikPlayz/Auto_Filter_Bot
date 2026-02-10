@@ -24,7 +24,7 @@ if TELEGRAPH_ACCESS_TOKEN:
 else:
     telegraph = Telegraph()
     try:
-        telegraph.create_account(short_name="DreamxBotz")
+        telegraph.create_account(short_name="RajatFiles")
     except Exception:
         logger.exception("Failed to create Telegraph account")
 
@@ -189,7 +189,7 @@ async def extract_data_handler(client: Client, query: CallbackQuery):
             page_parts.append("<b>Subtitle Tracks:</b> None<br>")
 
         page_parts.append(
-            '<i><code>Join <a href="https://t.me/DreamxBotz">DreamxBotz</a></code></i>'
+            '<i><code>Join <a href="https://t.me/rajatfiles">Rajat Files</a></code></i>'
         )
 
         page_content = "".join(page_parts)

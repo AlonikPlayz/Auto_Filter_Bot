@@ -400,7 +400,7 @@ sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️
 
 ‼️ ᴍᴜsᴛ sᴇɴᴅ sᴄʀᴇᴇɴsʜᴏᴛ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ.</b>"""
 
-    SOURCE_TXT ="""</b>IMPORTANT NOTICE
+    SOURCE_TXT ="""<b>IMPORTANT NOTICE
 
 Please note that this bot is a private project and is not distributed as an open-source application.
 Certain concepts and functionalities have been inspired by multiple publicly available repositories, while the overall implementation and management remain independent.

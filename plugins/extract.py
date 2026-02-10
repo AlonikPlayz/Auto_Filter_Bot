@@ -18,7 +18,7 @@ from dreamxbotz.util.file_properties import get_name
 logger = logging.getLogger(__name__)
 
 # Telegraph init
-TELEGRAPH_ACCESS_TOKEN = os.environ.get("TELEGRAPH_ACCESS_TOKEN") or "38a8ac190ac77ad863fa0c3fa98bdf0bb563fa200211b168062e5313b401"
+TELEGRAPH_ACCESS_TOKEN = os.environ.get("TELEGRAPH_ACCESS_TOKEN") or "33d8b37c1cc4583d75909161a046f94a7c75283dc8970f95d3386a328f6b"
 if TELEGRAPH_ACCESS_TOKEN:
     telegraph = Telegraph(access_token=TELEGRAPH_ACCESS_TOKEN)
 else:

@@ -14,7 +14,6 @@ from marshmallow import ValidationError
 from info import *
 from utils import get_settings, save_group_settings
 from datetime import datetime, timedelta
-import logging
 import asyncio
 
 logger = logging.getLogger(__name__)

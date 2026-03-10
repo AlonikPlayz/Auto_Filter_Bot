@@ -1,5 +1,3 @@
-# Patched by: https://github.com/LastPerson07
-
 import logging
 from struct import pack
 import re

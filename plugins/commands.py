@@ -13,7 +13,7 @@ from datetime import datetime
 from database.refer import referdb
 from database.config_db import mdb
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, ReplyKeyboardMarkup
-from pyrogram import Client, filters, enums
+from pyrogram import Client, filters, enums, StopPropagation
 from pyrogram.errors import FloodWait, ChatAdminRequired, UserNotParticipant , ChannelInvalid, PeerIdInvalid
 from database.ia_filterdb import Media, Media2, get_file_details, unpack_new_file_id, get_bad_files, save_file
 from database.users_chats_db import db
@@ -29,6 +29,7 @@ BATCH_FILES = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    sticker = None
     try:
         stick_id = "CAACAgUAAxkBAAEQJmJpViid_0yscWKPfh3RMCY8pIkmXwACMAcAAqzbsFexyKU6FPQAAjgE"
         try:
@@ -229,9 +230,13 @@ async def start(client, message):
         if len(message.command) == 2 and message.command[1].startswith('getfile'):
             movies = message.command[1].split("-", 1)[1] 
             movie = movies.replace('-',' ')
+            # We override message.text so auto_filter can use it as the search query.
+            # However, this change makes the message match generic text filters (like in pmfilter.py).
             message.text = movie 
             await auto_filter(client, message) 
-            return
+            # We raise StopPropagation to prevent other handlers (like pm_text in pmfilter.py)
+            # from firing and causing a duplicate search.
+            raise StopPropagation
 
         data = message.command[1]
         try:
@@ -462,6 +467,10 @@ async def start(client, message):
         await msg.delete()
         await k.edit_text("<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!</b>")
         return
+    except StopPropagation:
+        # We must re-raise StopPropagation so the Pyrogram dispatcher can catch it.
+        # Otherwise, it would be caught by 'except Exception' and logged as an error.
+        raise
     except Exception as e:
         logger.exception(f"Error In /start command - {e}")
         pass

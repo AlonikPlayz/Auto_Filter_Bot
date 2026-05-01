@@ -338,7 +338,7 @@ def unpack_new_file_id(new_file_id):
 async def dreamxbotz_fetch_media(limit: int) -> List[dict]:
     try:
         if MULTIPLE_DB:
-            db_size = await check_db_size(Media)
+            db_size = await check_db_size(db)
             if db_size > 407:
                 cursor = Media2.find().sort("$natural", -1).limit(limit)
                 files = await cursor.to_list(length=limit)

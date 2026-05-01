@@ -304,6 +304,7 @@ Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
 
 <blockquote>✨ ᴛɪᴛʟᴇ : <code>{filename}</code>
 
+📅 ʏᴇᴀʀ       : <b>{year}</b>
 🎭 ɢᴇɴʀᴇs : <b>{genres}</b>
 📺 ᴏᴛᴛ        : <b>{ott}</b>
 🎞️ ǫᴜᴀʟɪᴛʏ : <b>{quality}</b>

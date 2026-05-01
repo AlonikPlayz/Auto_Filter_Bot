@@ -230,12 +230,8 @@ async def start(client, message):
         if len(message.command) == 2 and message.command[1].startswith('getfile'):
             movies = message.command[1].split("-", 1)[1] 
             movie = movies.replace('-',' ')
-            # We override message.text so auto_filter can use it as the search query.
-            # However, this change makes the message match generic text filters (like in pmfilter.py).
             message.text = movie 
-            await auto_filter(client, message) 
-            # We raise StopPropagation to prevent other handlers (like pm_text in pmfilter.py)
-            # from firing and causing a duplicate search.
+            await auto_filter(client, message)
             raise StopPropagation
 
         data = message.command[1]
@@ -468,8 +464,6 @@ async def start(client, message):
         await k.edit_text("<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!</b>")
         return
     except StopPropagation:
-        # We must re-raise StopPropagation so the Pyrogram dispatcher can catch it.
-        # Otherwise, it would be caught by 'except Exception' and logged as an error.
         raise
     except Exception as e:
         logger.exception(f"Error In /start command - {e}")

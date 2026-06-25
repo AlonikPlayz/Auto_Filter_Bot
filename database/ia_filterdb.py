@@ -147,55 +147,43 @@ async def save_file(media):
     #logger.info(f"[SUCCESS] '{file_name}' saved to {target_db} DB.")
     return True, 1
 
-async def get_search_results(chat_id, query, file_type=None, max_results=None, offset=0, filter=False):
-    if chat_id is not None:
+async def get_search_results(chat_id, query, file_type=None, max_results=None, offset=0, use_filter=False,):
+    if chat_id is not None and max_results is None:
         settings = await get_settings(int(chat_id))
-        if max_results is None:
-            try:
-                max_results = 10 if settings.get("max_btn") else int(MAX_B_TN)
-            except KeyError:
-                await save_group_settings(int(chat_id), "max_btn", True)
-                settings = await get_settings(int(chat_id))
-                max_results = 10 if settings.get("max_btn") else int(MAX_B_TN)
+        if "max_btn" not in settings:
+            await save_group_settings(int(chat_id), "max_btn", True)
+            settings["max_btn"] = True
+        max_results = 10 if settings["max_btn"] else int(MAX_B_TN)
     if isinstance(query, list):
-        raw_pattern = '|'.join(re.escape(q.strip()) for q in query if q.strip())
-        regex_list = [compile_regex(raw_pattern)] if raw_pattern else []
+        raw_pattern = "|".join(re.escape(q.strip()) for q in query if q and q.strip())
+        if not raw_pattern:
+            return [], None, 0
+        regex = compile_regex(raw_pattern)
         if USE_CAPTION_FILTER:
-            filter_mongo = {"$or": ([{"file_name": r} for r in regex_list] + [{"caption": r} for r in regex_list])}
+            filter_mongo = {"$or": [{"file_name": regex},{"caption": regex},]}
         else:
-            filter_mongo = {"$or": [{"file_name": r} for r in regex_list]}
+            filter_mongo = {"file_name": regex}
     else:
         query = query.strip()
         if not query:
             return [], None, 0
-        if ' ' in query:
-            words = [re.escape(w) for w in query.split() if w.strip()]
-            if words:
-                raw_pattern = r'.*[\s\.\+\-_]'.join(words)
-            else:
-                raw_pattern = r'.'
-            try:
-                regex = compile_regex(raw_pattern)
-            except re.error:
-                return [], None, 0
-
-            if USE_CAPTION_FILTER:
-                filter_mongo = {"$or": [{"file_name": regex}, {"caption": regex}]}
-            else:
-                filter_mongo = {"file_name": regex}
+        if " " in query:
+            words = [re.escape(w) for w in query.split() if w]
+            raw_pattern = (r".*[\s\.\+\-_]".join(words) if words else r".")
         else:
-            raw_pattern = (r"(\b|[\.\+\-_])" + re.escape(query) + r"(\b|[\.\+\-_])")
-            try:
-                regex = compile_regex(raw_pattern)
-            except re.error:
-                return [], None, 0
-            if USE_CAPTION_FILTER:
-                filter_mongo = {"$or": [{"file_name": regex}, {"caption": regex}]}
-            else:
-                filter_mongo = {"file_name": regex}
+            raw_pattern = (r"(\b|[\.\+\-_])" + re.escape(query) + r"(\b|[\.\+\-_])" )
+        try:
+            regex = compile_regex(raw_pattern)
+        except re.error:
+            return [], None, 0
+        if USE_CAPTION_FILTER:
+            filter_mongo = { "$or": [{"file_name": regex}, {"caption": regex},]}
+        else:
+            filter_mongo = {"file_name": regex}
+
     if file_type:
         filter_mongo["file_type"] = file_type
-    # The rest of the function remains the same, using parallel queries.
+
     if ULTRA_FAST_MODE:
         limit = max_results + 1
         find_tasks = [Media.find(filter_mongo).sort("$natural", -1).skip(offset).limit(limit).to_list(length=limit)]
@@ -222,7 +210,6 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             asyncio.gather(*count_tasks),
             asyncio.gather(*find_tasks)
         )
-        
         total_results = sum(count_results)
         files = find_results[0]
         if MULTIPLE_DB and len(find_results) > 1:

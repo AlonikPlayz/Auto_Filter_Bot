@@ -147,7 +147,7 @@ async def save_file(media):
     #logger.info(f"[SUCCESS] '{file_name}' saved to {target_db} DB.")
     return True, 1
 
-async def get_search_results(chat_id, query, file_type=None, max_results=None, offset=0, use_filter=False,):
+async def get_search_results(chat_id, query, file_type=None, max_results=None, offset=0, filter=False):
     if chat_id is not None and max_results is None:
         settings = await get_settings(int(chat_id))
         if "max_btn" not in settings:

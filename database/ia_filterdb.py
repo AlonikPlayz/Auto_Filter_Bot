@@ -157,13 +157,9 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
                 await save_group_settings(int(chat_id), "max_btn", True)
                 settings = await get_settings(int(chat_id))
                 max_results = 10 if settings.get("max_btn") else int(MAX_B_TN)
-
-    # This is the new "middle-ground" regex logic for speed and flexibility
     if isinstance(query, list):
-        # This part handles season searches etc., where you need to match any of the full phrases.
         raw_pattern = '|'.join(re.escape(q.strip()) for q in query if q.strip())
         regex_list = [re.compile(raw_pattern, re.IGNORECASE)] if raw_pattern else []
-        
         if USE_CAPTION_FILTER:
             filter_mongo = {"$or": ([{"file_name": r} for r in regex_list] + [{"caption": r} for r in regex_list])}
         else:
@@ -172,8 +168,6 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
         query = query.strip()
         if not query:
             return [], None, 0
-
-        # Multi-word: use lazy-regex join to match flexible separators (fast & robust)
         if ' ' in query:
             words = [re.escape(w) for w in query.split() if w.strip()]
             if words:
@@ -190,45 +184,36 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             else:
                 filter_mongo = {"file_name": regex}
         else:
-            # SINGLE-WORD PATH: use word boundaries for exact matching
-            raw_pattern = r"\b" + re.escape(query) + r"\b"
+            raw_pattern = r"(?:^|[\s\.\-\_\(\)\[\]\{\}])" + re.escape(query)
             try:
                 regex = compile_regex(raw_pattern)
             except re.error:
                 return [], None, 0
-
             if USE_CAPTION_FILTER:
                 filter_mongo = {"$or": [{"file_name": regex}, {"caption": regex}]}
             else:
                 filter_mongo = {"file_name": regex}
-
     if file_type:
         filter_mongo["file_type"] = file_type
-    
     # The rest of the function remains the same, using parallel queries.
     if ULTRA_FAST_MODE:
         limit = max_results + 1
         find_tasks = [Media.find(filter_mongo).sort("$natural", -1).skip(offset).limit(limit).to_list(length=limit)]
         if MULTIPLE_DB:
             find_tasks.append(Media2.find(filter_mongo).sort("$natural", -1).skip(offset).limit(limit).to_list(length=limit))
-        
         results = await asyncio.gather(*find_tasks)
         files = results[0]
         if MULTIPLE_DB and len(results) > 1:
             files.extend(results[1])
-        
         files = files[:limit]
-
         has_next_page = len(files) > max_results
         if has_next_page:
             files = files[:-1]
-
         next_offset = offset + len(files) if has_next_page else ""
         total_results = offset + len(files) + (1 if has_next_page else 0)
     else:
         count_tasks = [Media.count_documents(filter_mongo)]
         find_tasks = [Media.find(filter_mongo).sort("$natural", -1).skip(offset).limit(max_results).to_list(length=max_results)]
-
         if MULTIPLE_DB:
             count_tasks.append(Media2.count_documents(filter_mongo))
             find_tasks.append(Media2.find(filter_mongo).sort("$natural", -1).skip(offset).limit(max_results).to_list(length=max_results))
@@ -242,13 +227,10 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
         files = find_results[0]
         if MULTIPLE_DB and len(find_results) > 1:
             files.extend(find_results[1])
-        
         files = files[:max_results]
-        
         next_offset = offset + len(files)
         if next_offset >= total_results:
             next_offset = ""
-
     return files, next_offset, total_results
 
 async def get_bad_files(query, file_type=None):

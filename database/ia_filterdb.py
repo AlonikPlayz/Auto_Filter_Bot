@@ -6,9 +6,9 @@ from pyrogram.file_id import FileId
 from typing import Dict, List
 from collections import defaultdict
 from pymongo.errors import DuplicateKeyError
+# pyrefly: ignore [missing-import]
 from umongo import Instance, Document, fields
 from motor.motor_asyncio import AsyncIOMotorClient
-from marshmallow import ValidationError
 from info import *
 from utils import get_settings, save_group_settings
 from datetime import datetime, timedelta

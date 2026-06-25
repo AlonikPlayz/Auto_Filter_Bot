@@ -185,8 +185,9 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             else:
                 filter_mongo = {"file_name": regex}
         else:
-            # SINGLE-WORD PATH: keep regex, but make it lazy and word-bound for speed.
-            raw_pattern = re.escape(query)
+            # SINGLE-WORD PATH: use .*? prefix to force MongoDB collection scan
+            # (same as multi-word path — prevents text-index mis-optimization)
+            raw_pattern = r'.*?' + re.escape(query)
             try:
                 regex = re.compile(raw_pattern, flags=re.IGNORECASE)
             except re.error:

@@ -159,7 +159,7 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
                 max_results = 10 if settings.get("max_btn") else int(MAX_B_TN)
     if isinstance(query, list):
         raw_pattern = '|'.join(re.escape(q.strip()) for q in query if q.strip())
-        regex_list = [re.compile(raw_pattern, re.IGNORECASE)] if raw_pattern else []
+        regex_list = [compile_regex(raw_pattern)] if raw_pattern else []
         if USE_CAPTION_FILTER:
             filter_mongo = {"$or": ([{"file_name": r} for r in regex_list] + [{"caption": r} for r in regex_list])}
         else:
@@ -171,7 +171,7 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
         if ' ' in query:
             words = [re.escape(w) for w in query.split() if w.strip()]
             if words:
-                raw_pattern = r'.*?'.join(words)
+                raw_pattern = r'.*[\s\.\+\-_]'.join(words)
             else:
                 raw_pattern = r'.'
             try:
@@ -184,7 +184,7 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             else:
                 filter_mongo = {"file_name": regex}
         else:
-            raw_pattern = r"(?:^|[\s\.\-\_\(\)\[\]\{\}])" + re.escape(query)
+            raw_pattern = (r"(\b|[\.\+\-_])" + re.escape(query) + r"(\b|[\.\+\-_])")
             try:
                 regex = compile_regex(raw_pattern)
             except re.error:
@@ -235,20 +235,16 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
 
 async def get_bad_files(query, file_type=None):
     query = query.strip()
-
     if not query:
         return [], 0
-
     if " " not in query:
         raw_pattern = r"(\b|[\.\+\-_])" + re.escape(query) + r"(\b|[\.\+\-_])"
     else:
-        raw_pattern = r".*?".join(map(re.escape, query.split()))
-
+        raw_pattern = r".*[\s\.\+\-_]".join(map(re.escape, query.split()))
     try:
         regex = compile_regex(raw_pattern)
     except re.error:
         return [], 0
-
     if USE_CAPTION_FILTER:
         filter_mongo = {
             "$or": [
@@ -274,32 +270,23 @@ async def get_bad_files(query, file_type=None):
             .sort("$natural", -1)
             .to_list(300)
         )
-
     results = await asyncio.gather(*tasks)
-
     files = results[0]
-
     if MULTIPLE_DB and len(results) > 1:
         files.extend(results[1])
     files = files[:300]
     return files, len(files)
 
-
 async def get_file_details(query):
     filter = {"file_id": query}
-    
     tasks = [Media.find(filter).to_list(length=1)]
     if MULTIPLE_DB:
-        tasks.append(Media2.find(filter).to_list(length=1))
-        
+        tasks.append(Media2.find(filter).to_list(length=1))  
     results = await asyncio.gather(*tasks)
-    
     for filedetails in results:
         if filedetails:
-            return filedetails
-            
+            return filedetails       
     return []
-
 
 def encode_file_id(s: bytes) -> str:
     r = b""

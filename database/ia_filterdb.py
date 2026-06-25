@@ -13,6 +13,7 @@ from info import *
 from utils import get_settings, save_group_settings
 from datetime import datetime, timedelta
 import asyncio
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -20,6 +21,10 @@ logger.setLevel(logging.INFO)
 
 # Global cache for DB size
 _db_stats_cache = {"timestamp": None, "primary_size": 0.0}
+
+@lru_cache(maxsize=4096)
+def compile_regex(pattern):
+    return re.compile(pattern, re.IGNORECASE)
 
 # Primary DB
 client = AsyncIOMotorClient(DATABASE_URI)
@@ -83,8 +88,8 @@ async def check_db_size(db):
         _db_stats_cache["primary_size"] = db_size_mb
         _db_stats_cache["timestamp"] = now
         return db_size_mb
-    except Exception as e:
-        print(f"Error Checking Database Size: {e}")
+    except Exception:
+        logger.exception("Error checking database size")
         return 0
 
 
@@ -99,7 +104,7 @@ async def save_file(media):
     target_db = "Primary"
     if MULTIPLE_DB:
         try:
-            exists = await Media.count_documents({"file_id": file_id}, limit=1)
+            exists = await Media.find_one({"file_id": file_id})
             if exists:
                 logger.info(f"[SKIP] '{file_name}' already in Primary DB.")
                 return False, 0
@@ -176,7 +181,7 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             else:
                 raw_pattern = r'.'
             try:
-                regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+                regex = compile_regex(raw_pattern)
             except re.error:
                 return [], None, 0
 
@@ -185,11 +190,10 @@ async def get_search_results(chat_id, query, file_type=None, max_results=None, o
             else:
                 filter_mongo = {"file_name": regex}
         else:
-            # SINGLE-WORD PATH: use .*? prefix to force MongoDB collection scan
-            # (same as multi-word path — prevents text-index mis-optimization)
-            raw_pattern = r'.*?' + re.escape(query)
+            # SINGLE-WORD PATH: use word boundaries for exact matching
+            raw_pattern = r"\b" + re.escape(query) + r"\b"
             try:
-                regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+                regex = compile_regex(raw_pattern)
             except re.error:
                 return [], None, 0
 
@@ -251,38 +255,52 @@ async def get_bad_files(query, file_type=None):
     query = query.strip()
 
     if not query:
-        raw_pattern = '.'
-    elif ' ' not in query:
+        return [], 0
+
+    if " " not in query:
         raw_pattern = r"(\b|[\.\+\-_])" + re.escape(query) + r"(\b|[\.\+\-_])"
     else:
-        # lazy regex instead of greedy
-        raw_pattern = r'.*?'.join(map(re.escape, query.split()))
+        raw_pattern = r".*?".join(map(re.escape, query.split()))
 
     try:
-        regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+        regex = compile_regex(raw_pattern)
     except re.error:
         return [], 0
 
     if USE_CAPTION_FILTER:
-        filter_mongo = {'$or': [{'file_name': regex}, {'caption': regex}]}
+        filter_mongo = {
+            "$or": [
+                {"file_name": regex},
+                {"caption": regex}
+            ]
+        }
     else:
-        filter_mongo = {'file_name': regex}
+        filter_mongo = {"file_name": regex}
 
     if file_type:
-        filter_mongo['file_type'] = file_type
+        filter_mongo["file_type"] = file_type
 
-    cursor1 = Media.find(filter_mongo).sort('$natural', -1)
-    files1 = await cursor1.to_list(length=(await Media.count_documents(filter_mongo)))
+    tasks = [
+        Media.find(filter_mongo)
+        .sort("$natural", -1)
+        .to_list(300)
+    ]
 
     if MULTIPLE_DB:
-        cursor2 = Media2.find(filter_mongo).sort('$natural', -1)
-        files2 = await cursor2.to_list(length=(await Media2.count_documents(filter_mongo)))
-        files = files1 + files2
-    else:
-        files = files1
+        tasks.append(
+            Media2.find(filter_mongo)
+            .sort("$natural", -1)
+            .to_list(300)
+        )
 
-    total_results = len(files)
-    return files, total_results
+    results = await asyncio.gather(*tasks)
+
+    files = results[0]
+
+    if MULTIPLE_DB and len(results) > 1:
+        files.extend(results[1])
+    files = files[:300]
+    return files, len(files)
 
 
 async def get_file_details(query):

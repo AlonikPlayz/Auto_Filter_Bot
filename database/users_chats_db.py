@@ -138,7 +138,7 @@ class Database:
         await self.grp.update_one({'id': int(id)}, {'$set': {'chat_status': chat_status}})
         
     async def update_settings(self, id, settings):
-        await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
+        await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}}, upsert=True)
                                   
     async def get_settings(self, id):
         default = {
@@ -168,9 +168,21 @@ class Database:
             'caption': CUSTOM_FILE_CAPTION,
             'fsub': AUTH_CHANNELS,
         }
-        chat = await self.grp.find_one({'id':int(id)})
+        chat = await self.grp.find_one({'id': int(id)})
         if chat and 'settings' in chat:
-            return chat['settings']
+            saved = chat['settings']
+            res = default.copy()
+            res.update(saved)
+            if not saved.get('custom_shortner'):
+                res['shortner'] = SHORTENER_WEBSITE
+                res['api'] = SHORTENER_API
+            if not saved.get('custom_shortner_two'):
+                res['shortner_two'] = SHORTENER_WEBSITE2
+                res['api_two'] = SHORTENER_API2
+            if not saved.get('custom_shortner_three'):
+                res['shortner_three'] = SHORTENER_WEBSITE3
+                res['api_three'] = SHORTENER_API3
+            return res
         else:
             return default.copy()
 

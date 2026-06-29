@@ -146,7 +146,7 @@ async def next_page(bot, query):
         return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     try:
         offset = int(offset)
-    except:
+    except Exception:
         offset = 0
     if BUTTONS.get(key) != None:
         search = BUTTONS.get(key)
@@ -158,7 +158,7 @@ async def next_page(bot, query):
     files, n_offset, total = await get_search_results(query.message.chat.id, search, offset=offset, filter=True)
     try:
         n_offset = int(n_offset)
-    except:
+    except Exception:
         n_offset = 0
 
     if not files:
@@ -1814,7 +1814,7 @@ async def advantage_spell_chok(client, message):
         await k.delete()
         try:
             await message.delete()
-        except:
+        except Exception:
             pass
         return
     user = message.from_user.id if message.from_user else 0
@@ -1829,6 +1829,6 @@ async def advantage_spell_chok(client, message):
     await d.delete()
     try:
         await message.delete()
-    except:
+    except Exception:
         pass
     

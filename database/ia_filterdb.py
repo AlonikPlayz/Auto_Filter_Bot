@@ -32,9 +32,14 @@ db = client[DATABASE_NAME]
 instance = Instance.from_db(db)
 
 # secondary db
-client2 = AsyncIOMotorClient(DATABASE_URI2)
-db2 = client2[DATABASE_NAME]
-instance2 = Instance.from_db(db2)
+if MULTIPLE_DB and DATABASE_URI2:
+    client2 = AsyncIOMotorClient(DATABASE_URI2)
+    db2 = client2[DATABASE_NAME]
+    instance2 = Instance.from_db(db2)
+else:
+    client2 = client
+    db2 = db
+    instance2 = instance
 
 
 @instance.register

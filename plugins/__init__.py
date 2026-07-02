@@ -3,7 +3,8 @@ from .route import routes
 from asyncio import sleep 
 from datetime import datetime
 from database.users_chats_db import db
-from info import LOG_CHANNEL, URL, PREMIUM_LOGS
+from info import URL, PREMIUM_LOGS
+from Script import script
 import aiohttp
 import asyncio
 import logging

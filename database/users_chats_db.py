@@ -439,6 +439,9 @@ class Database:
         await self.update_bot_setting(bot_id, 'MAINTENANCE', enable)
      
 db = Database(DATABASE_URI, DATABASE_NAME)    
-db2 = Database(DATABASE_URI2, DATABASE_NAME)
+if MULTIPLE_DB and DATABASE_URI2:
+    db2 = Database(DATABASE_URI2, DATABASE_NAME)
+else:
+    db2 = db
 
 

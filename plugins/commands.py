@@ -9,7 +9,7 @@ import sys
 import pytz
 from .pmfilter import auto_filter 
 from Script import script
-from datetime import datetime
+from datetime import datetime, timedelta
 from database.refer import referdb
 from database.config_db import mdb
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, ReplyKeyboardMarkup
@@ -193,16 +193,17 @@ async def start(client, message):
             fromuse = referdb.get_refer_points(user_id) + 10
             if fromuse == 100:
                 referdb.add_refer_points(user_id, 0) 
-                await message.reply_text(script.REFER_CONGRATS_ALRT.format(uss.mention))		    
-                await message.reply_text(user_id, script.REFER_INVITED_ALRT.format(message.from_user.mention)) 	
+                await message.reply_text(script.REFER_INVITED_ALRT.format(uss.mention))		    
+                await client.send_message(chat_id=user_id, text=script.REFER_CONGRATS_ALRT.format(message.from_user.mention)) 	
                 seconds = 2592000
                 if seconds > 0:
-                    expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+                    expiry_time = datetime.now() + timedelta(seconds=seconds)
                     user_data = {"id": user_id, "expiry_time": expiry_time}  # Using "id" instead of "user_id"  
                     await db.update_user(user_data)  # Use the update_user method to update or insert user data		    
                     await client.send_message(
-                    chat_id=user_id,
-                    text=f"<b>Hᴇʏ {uss.mention}\n\nYᴏᴜ ɢᴏᴛ 1 ᴍᴏɴᴛʜ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙʏ ɪɴᴠɪᴛɪɴɢ 10 ᴜsᴇʀs ❗", disable_web_page_preview=True              
+                        chat_id=user_id,
+                        text=f"<b>Hᴇʏ {uss.mention}\n\nYᴏᴜ ɢᴏᴛ 1 ᴍᴏɴᴛʜ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙʏ ɪɴᴠɪᴛɪɴɢ 10 ᴜsᴇʀs ❗</b>",
+                        disable_web_page_preview=True              
                     )
                 for admin in ADMINS:
                     await client.send_message(chat_id=admin, text=f"Sᴜᴄᴄᴇss ғᴜʟʟʏ ᴛᴀsᴋ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ʙʏ ᴛʜɪs ᴜsᴇʀ:\n\nuser Nᴀᴍᴇ: {uss.mention}\n\nUsᴇʀ ɪᴅ: {uss.id}!")	

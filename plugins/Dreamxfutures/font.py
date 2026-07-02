@@ -168,7 +168,13 @@ async def style(c, m):
     if style == 'frozen':
         cls = Fonts.frozen
 
-    r, oldtxt = m.message.reply_to_message.text.split(None, 1) 
+    if m.message.reply_to_message and m.message.reply_to_message.text:
+        try:
+            oldtxt = m.message.reply_to_message.text.split(None, 1)[1]
+        except IndexError:
+            oldtxt = m.message.text
+    else:
+        oldtxt = m.message.text
     new_text = cls(oldtxt)            
     try:
         await m.message.edit_text(f"`{new_text}`\n\n👆 Click To Copy", reply_markup=m.message.reply_markup)

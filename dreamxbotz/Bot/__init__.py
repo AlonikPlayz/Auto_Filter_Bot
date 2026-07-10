@@ -30,7 +30,7 @@ class dreamcinezoneXBot(Client):
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
             workers=60,
-            plugins={"root": "plugins"},
+            plugins=dict(root= "plugins"),
             sleep_threshold=5,
         )
     async def iter_messages(

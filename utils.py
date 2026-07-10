@@ -15,6 +15,7 @@ from typing import List
 from database.users_chats_db import db
 from bs4 import BeautifulSoup
 import requests
+import aiohttp
 from shortzy import Shortzy
 
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
@@ -500,14 +501,18 @@ async def search_gagala(text):
     usr_agent = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
         'Chrome/61.0.3163.100 Safari/537.36'
-        }
-    text = text.replace(" ", '+')
-    url = f'https://www.google.com/search?q={text}'
-    response = requests.get(url, headers=usr_agent)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'html.parser')
-    titles = soup.find_all( 'h3' )
-    return [title.getText() for title in titles]
+    }
+    text = text.replace(" ", "+")
+    url = f"https://www.google.com/search?q={text}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=usr_agent, timeout=30) as response:
+            response.raise_for_status()
+            html = await response.text()
+
+    soup = await asyncio.to_thread(BeautifulSoup, html, 'html.parser')
+    titles = soup.find_all('h3')
+    return [title.get_text() for title in titles if title.get_text().strip()]
 
 async def get_shortlink(link, grp_id, is_second_shortener=False, is_third_shortener=False):
     settings = await get_settings(grp_id)

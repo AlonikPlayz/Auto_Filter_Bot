@@ -49,17 +49,18 @@ def get_plugins_names(plugins_dir="plugins"):
 async def dreamxbotz_start():
     logging.info('\n\nInitializing DreamxBotz')
     await dreamxbotz.start()
-    try:
-        await dreamxbotz.delete_webhook(drop_pending_updates=True)
-        logging.info("Webhook deleted successfully.")
-    except Exception as e:
-        logging.error(f"Error deleting webhook: {e}")
     bot_info = await dreamxbotz.get_me()
     dreamxbotz.username = bot_info.username
     await initialize_clients()
     plugins_names = get_plugins_names()
     if plugins_names:
         logging.info("Plugins Found (%d): %s", len(plugins_names), ", ".join(plugins_names))
+        import importlib
+        for name in plugins_names:
+            try:
+                importlib.import_module(f"plugins.{name}")
+            except Exception:
+                logging.exception(f"❌ Failed to import plugin: plugins.{name}")
     else:
         logging.warning("No plugins found.")
 

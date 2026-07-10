@@ -49,6 +49,11 @@ def get_plugins_names(plugins_dir="plugins"):
 async def dreamxbotz_start():
     logging.info('\n\nInitializing DreamxBotz')
     await dreamxbotz.start()
+    try:
+        await dreamxbotz.delete_webhook(drop_pending_updates=True)
+        logging.info("Webhook deleted successfully.")
+    except Exception as e:
+        logging.error(f"Error deleting webhook: {e}")
     bot_info = await dreamxbotz.get_me()
     dreamxbotz.username = bot_info.username
     await initialize_clients()
@@ -91,6 +96,8 @@ async def dreamxbotz_start():
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
     dreamxbotz.loop.create_task(keep_alive())
+    total = sum(len(v) for v in dreamxbotz.dispatcher.groups.values())
+    logging.info("🔥 TOTAL HANDLERS = %d", total)
     try:
         await idle()
     finally:

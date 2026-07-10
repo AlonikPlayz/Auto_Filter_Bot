@@ -95,8 +95,7 @@ async def dreamxbotz_start():
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
     dreamxbotz.loop.create_task(keep_alive())
-    total = sum(len(v) for v in dreamxbotz.dispatcher.groups.values())
-    logging.info("🔥 TOTAL HANDLERS = %d", total)
+
     try:
         await idle()
     finally:

@@ -48,6 +48,10 @@ def get_plugins_names(plugins_dir="plugins"):
 
 async def dreamxbotz_start():
     logging.info('\n\nInitializing DreamxBotz')
+    loop = asyncio.get_running_loop()
+    dreamxbotz.loop = loop
+    if dreamxbotz.dispatcher:
+        dreamxbotz.dispatcher.loop = loop
     await dreamxbotz.start()
     bot_info = await dreamxbotz.get_me()
     dreamxbotz.username = bot_info.username
@@ -55,12 +59,6 @@ async def dreamxbotz_start():
     plugins_names = get_plugins_names()
     if plugins_names:
         logging.info("Plugins Found (%d): %s", len(plugins_names), ", ".join(plugins_names))
-        import importlib
-        for name in plugins_names:
-            try:
-                importlib.import_module(f"plugins.{name}")
-            except Exception:
-                logging.exception(f"❌ Failed to import plugin: plugins.{name}")
     else:
         logging.warning("No plugins found.")
 

@@ -12,13 +12,10 @@ logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
 from pyrogram import Client
-from info import *
+from info import API_ID, API_HASH, BOT_TOKEN, SESSION
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
 from aiohttp import web
-
-from pyrogram import Client
-from info import *
 
 
 class dreamcinezoneXBot(Client):

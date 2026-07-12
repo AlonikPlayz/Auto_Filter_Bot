@@ -9,7 +9,7 @@ from dreamxbotz.Bot import multi_clients, work_loads
 from dreamxbotz.server.exceptions import FIleNotFound, InvalidHash
 from dreamxbotz.util.custom_dl import ByteStreamer
 from dreamxbotz.util.render_template import render_page
-from info import *
+from info import MULTI_CLIENT
 
 
 routes = web.RouteTableDef()

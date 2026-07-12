@@ -1,8 +1,15 @@
-import motor.motor_asyncio
-from info import *
 import datetime
 import pytz  
-from pymongo.errors import DuplicateKeyError
+import motor.motor_asyncio
+from info import (
+    DATABASE_NAME,DATABASE_URI,DATABASE_URI2, MULTIPLE_DB, MAINTENANCE, PM_SEARCH,
+    BUTTON_MODE, P_TTI_SHOW_OFF, PROTECT_CONTENT, IMDB, SPELL_CHECK_REPLY, MELCOW_NEW_USERS, 
+    AUTO_DELETE, AUTO_FFILTER, MAX_BTN, IMDB_TEMPLATE, LOG_VR_CHANNEL, TUTORIAL, TUTORIAL_2,
+    TUTORIAL_3, SHORTENER_API, SHORTENER_API2, SHORTENER_API3, SHORTENER_WEBSITE, SHORTENER_WEBSITE2,
+    SHORTENER_WEBSITE3, IS_VERIFY, TWO_VERIFY_GAP, THREE_VERIFY_GAP, CUSTOM_FILE_CAPTION, AUTH_CHANNELS,
+    MOVIE_UPDATE_NOTIFICATION
+)
+
 
 class Database:    
     def __init__(self, uri, database_name):
@@ -11,7 +18,7 @@ class Database:
         # Collections
         self.col = self.db.users
         self.grp = self.db.groups
-        self.users = self.db.uersz
+        self.users = self.db.uersz #Premium users
         self.req = self.db.requests
         self.botcol = self.db.bot_settings
         self.misc = self.db.misc

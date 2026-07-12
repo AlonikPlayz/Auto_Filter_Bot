@@ -10,7 +10,7 @@ import pytz
 from aiohttp import web
 from database.ia_filterdb import Media, Media2
 from database.users_chats_db import db
-from info import *
+from info import MULTIPLE_DB, ON_HEROKU, LOG_STR, LOG_CHANNEL, PORT
 from utils import temp
 from Script import script
 from plugins import web_server, check_expired_premium, keep_alive

@@ -2,7 +2,7 @@
 import math
 import asyncio
 import logging
-from info import *
+from info import BIN_CHANNEL
 from typing import Dict, Union
 from dreamxbotz.Bot import work_loads
 from pyrogram import Client, utils, raw
@@ -141,8 +141,7 @@ class ByteStreamer:
 
             location = raw.types.InputPeerPhotoFileLocation(
                 peer=peer,
-                volume_id=file_id.volume_id,
-                local_id=file_id.local_id,
+                photo_id=file_id.media_id,
                 big=file_id.thumbnail_source == ThumbnailSource.CHAT_PHOTO_BIG,
             )
         elif file_type == FileType.PHOTO:

@@ -2,13 +2,19 @@
 import pytz
 import datetime
 from Script import script 
-from info import *
+from info import ADMINS, PREMIUM_LOGS, STAR_PREMIUM_PLANS, SUBSCRIPTION
 from utils import get_seconds, temp
 from database.users_chats_db import db 
 import asyncio
 from pyrogram import Client, filters 
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong
-from pyrogram.types import *
+from pyrogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    LabeledPrice,
+    PreCheckoutQuery,
+)
 
 
 @Client.on_message(filters.command("remove_premium") & filters.user(ADMINS))
@@ -232,10 +238,10 @@ async def pre_checkout_handler(client, query: PreCheckoutQuery):
         if query.payload.startswith("dreamxpremium_"):
             await query.answer(success=True)
         else:
-            await query.answer(success=False, error_message="⚠️ Invalid Purchase Type.", show_alert=True)
+            await query.answer(success=False, error="⚠️ Invalid Purchase Type.")
     except Exception as e:
         print(f"Pre-checkout error: {e}")
-        await query.answer(success=False, error_message="🚫 Unexpected Error Occurred." , show_alert=True)
+        await query.answer(success=False, error="🚫 Unexpected Error Occurred.")
 
 @Client.on_message(filters.successful_payment)
 async def successful_premium_payment(client, message):
@@ -255,7 +261,7 @@ async def successful_premium_payment(client, message):
                 expiry = data.get("expiry_time")
                 expiry_str_in_ist = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y | %I:%M:%S %p")    
                 await message.reply(text=f"Thankyou For Purchasing Premium Service Using Star ✅\n\nSubscribtion Time - {time}\nExpire In - {expiry_str_in_ist}", disable_web_page_preview=True)                
-                await client.send_message(PREMIUM_LOGS, text=f"#Purchase_Premium_With_Start\n\n👤 ᴜꜱᴇʀ - {message.user.mention}\n\n⚡ ᴜꜱᴇʀ ɪᴅ - <code>{user_id}</code>\n\n🚫 ꜱᴛᴀʀ ᴘᴀʏ - {amount}⭐\n\n⏰ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ - {time}\n\n⌛️ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ - {current_time}\n\n⌛️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ - {expiry_str_in_ist}", disable_web_page_preview=True)
+                await client.send_message(PREMIUM_LOGS, text=f"#Purchase_Premium_With_Start\n\n👤 ᴜꜱᴇʀ - {message.from_user.mention}\n\n⚡ ᴜꜱᴇʀ ɪᴅ - <code>{user_id}</code>\n\n🚫 ꜱᴛᴀʀ ᴘᴀʏ - {amount}⭐\n\n⏰ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ - {time}\n\n⌛️ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ - {current_time}\n\n⌛️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ - {expiry_str_in_ist}", disable_web_page_preview=True)
             else:
                 await message.reply("⚠️ Invalid Premium Time.")
         else:

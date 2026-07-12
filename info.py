@@ -201,24 +201,34 @@ BAD_WORDS = {
     "original"
 } # Set of bad words to filter out
    
-# ============================
+
+# ============================
 # Server & Web Configuration
 # ============================
 
-NO_PORT = is_enabled(environ.get('NO_PORT', "False"), False)
 ON_HEROKU = 'DYNO' in environ
-APP_NAME = environ.get('APP_NAME')
-BIND_ADRESS = str(getenv('WEB_SERVER_BIND_ADDRESS', '0.0.0.0'))
-FQDN = str(getenv('FQDN', BIND_ADRESS)) if not ON_HEROKU or getenv('FQDN') else f"{APP_NAME}.herokuapp.com"
+APP_NAME = environ.get('APP_NAME', None) if ON_HEROKU else None
+BIND_ADDRESS = getenv('WEB_SERVER_BIND_ADDRESS', '0.0.0.0')
+FQDN = (
+    environ.get('FQDN', BIND_ADDRESS)
+    if not ON_HEROKU or environ.get('FQDN')
+    else f"{APP_NAME}.herokuapp.com"
+)
+FQDN = re.sub(r'^https?://', '', str(FQDN)).rstrip('/')
+NO_PORT = is_enabled(environ.get('NO_PORT'), False)
+HAS_SSL = is_enabled(getenv('HAS_SSL'), True)
+
+if HAS_SSL:
+    URL = f"https://{FQDN}/"
+else:
+    URL = f"http://{FQDN}/" if NO_PORT else f"http://{FQDN}:{PORT}/"
+    
 SLEEP_THRESHOLD = int(environ.get('SLEEP_THRESHOLD', '60'))
 WORKERS = int(environ.get('WORKERS', '4'))
 SESSION_NAME = str(environ.get('SESSION_NAME', 'dreamXBotz'))
 MULTI_CLIENT = False
 name = str(environ.get('name', 'DREAMXBOTZ'))
-PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # 20 minutes
-HAS_SSL = is_enabled(getenv('HAS_SSL', "True"), True)
-scheme = "https" if HAS_SSL else "http"
-URL = f"{scheme}://{FQDN}/" if ON_HEROKU or NO_PORT else f"{scheme}://{FQDN}:{PORT}/"
+PING_INTERVAL = int(environ.get("PING_INTERVAL", "298"))  # 5 minutes
 # ============================
 REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🎅", "😐", "🥰", "🤩", "😱", "🤣", "😘", "👏", "😛", "😈", "🎉", "⚡️", "🫡", "🤓", "😎", "🏆", "🔥", "🤭", "🌚", "🆒", "👻", "😁"]
 

@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 TIMEZONE = "Asia/Kolkata"
 BATCH_FILES = {}
+REQUEST_INVITE_LINK_CACHE: dict[int, str] = {}
+
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -716,55 +718,74 @@ async def save_template(client, message):
 
 
 # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
-@Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")) & filters.group)
+@Client.on_message((filters.command("request") | filters.regex(r"(?i)#request")) & filters.group)
 async def requests(bot, message):
-    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None:
+    if message.chat.id != SUPPORT_CHAT_ID:
         return
-    if SUPPORT_CHAT_ID != message.chat.id:
-        return
-
+    if not message.from_user:
+        return await message.reply_text("<b>⚠️ ᴜɴᴀʙʟᴇ ᴛᴏ ɪᴅᴇɴᴛɪꜰʏ ʏᴏᴜ.</b>")
+    
     reporter = str(message.from_user.id)
     mention = message.from_user.mention
 
     if message.reply_to_message:
         target_msg = message.reply_to_message
-        content = target_msg.text or ""
+        content = target_msg.text or target_msg.caption or ""
         msg_link = target_msg.link
     else:
-        content = message.text or ""
-        for keyword in ["#request", "/request", "#Request", "/Request"]:
-            content = content.replace(keyword, "")
+        content = message.text or message.caption or ""
+        content = re.sub(r"(?i)[#/]?request", "", content).strip()
         msg_link = message.link
 
     content = content.strip()
     if len(content) < 3:
         return await message.reply_text("<b>ʏᴏᴜ ᴍᴜꜱᴛ ᴛʏᴘᴇ ᴀʙᴏᴜᴛ ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ [ᴍɪɴɪᴍᴜᴍ 3 ᴄʜᴀʀᴀᴄᴛᴇʀꜱ]. ʀᴇǫᴜᴇꜱᴛꜱ ᴄᴀɴ'ᴛ ʙᴇ ᴇᴍᴘᴛʏ.</b>")
-
-    reported_post = None
+    
+    reported_post: Message | None = None
     try:
         btn = [[
-            InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=f"{msg_link}"),
+            InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=msg_link),
             InlineKeyboardButton('ꜱʜᴏᴡ ᴏᴘᴛɪᴏɴꜱ', callback_data=f'show_option#{reporter}')
         ]]
         req_text = f"<b>📝 ʀᴇǫᴜᴇꜱᴛ : <u>{content}</u>\n\n📚 ʀᴇᴘᴏʀᴛᴇᴅ ʙʏ : {mention}\n📖 ʀᴇᴘᴏʀᴛᴇʀ ɪᴅ : {reporter}\n\n</b>"
+        warning_text = "<b>⚠️ ʀᴇǫᴜᴇꜱᴛ ᴄʜᴀɴɴᴇʟ ɪꜱ ɴᴏᴛ ꜱᴇᴛ.</b>"
         if REQST_CHANNEL is not None:
-            reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
+            try:
+                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
+            except Exception:
+                for admin in ADMINS:
+                    await bot.send_message(chat_id=admin, text=warning_text)
+                    reported_post = await bot.send_message(chat_id=admin, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
         else:
             for admin in ADMINS:
+                await bot.send_message(chat_id=admin, text=warning_text)
                 reported_post = await bot.send_message(chat_id=admin, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
-    except Exception as e:
-        return await message.reply_text(f"Error: {e}")
+    except Exception:
+        logger.exception("Request failed")
+        return await message.reply_text( "<b>⚠️ ꜱᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ. ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ.</b>")
 
     if reported_post and REQST_CHANNEL is not None:
         try:
-            link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
-            btn = [[
-                InlineKeyboardButton('ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ', url=link.invite_link),
-                InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=f"{reported_post.link}")
-            ]]
-            await message.reply_text("<b>ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ʜᴀꜱ ʙᴇᴇɴ ᴀᴅᴅᴇᴅ! ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ꜱᴏᴍᴇ ᴛɪᴍᴇ.\n\nᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ & ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ.</b>", reply_markup=InlineKeyboardMarkup(btn))
-        except Exception as e:
-            await message.reply_text(f"Error: {e}")
+            invite_link = REQUEST_INVITE_LINK_CACHE.get(REQST_CHANNEL)
+            if not invite_link:
+                try:
+                    link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
+                    invite_link = link.invite_link
+                    REQUEST_INVITE_LINK_CACHE[REQST_CHANNEL] = invite_link
+                except Exception:
+                    logger.exception("Failed to create invite link")
+                    invite_link = None
+            if invite_link:
+                btn = [[
+                    InlineKeyboardButton('ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ', url=invite_link),
+                    InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=reported_post.link)
+                ]]
+                await message.reply_text("<b>ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ʜᴀꜱ ʙᴇᴇɴ ᴀᴅᴅᴇᴅ! ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ꜱᴏᴍᴇ ᴛɪᴍᴇ.\n\nᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ & ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ.</b>", reply_markup=InlineKeyboardMarkup(btn))
+            else:
+                await message.reply_text("<b>ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ʜᴀꜱ ʙᴇᴇɴ ᴀᴅᴅᴇᴅ! ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ꜱᴏᴍᴇ ᴛɪᴍᴇ.</b>")
+        except Exception:
+            logger.exception("Failed to send request confirmation")
+            await message.reply_text("<b>⚠️ ꜱᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ. ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ.</b>")
 
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):

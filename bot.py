@@ -48,10 +48,6 @@ def get_plugins_names(plugins_dir="plugins"):
 
 async def dreamxbotz_start():
     logging.info('\n\nInitializing DreamxBotz')
-    loop = asyncio.get_running_loop()
-    dreamxbotz.loop = loop
-    if dreamxbotz.dispatcher:
-        dreamxbotz.dispatcher.loop = loop
     await dreamxbotz.start()
     bot_info = await dreamxbotz.get_me()
     dreamxbotz.username = bot_info.username
@@ -103,7 +99,7 @@ async def dreamxbotz_start():
 
 if __name__ == '__main__':
     try:
-        asyncio.run(dreamxbotz_start())
+        dreamxbotz.run(dreamxbotz_start())
     except FloodWait as e:
         logging.info(f"FloodWait! Sleeping for {e.value} seconds.")
         time.sleep(e.value)

@@ -131,6 +131,12 @@ DreamxBotz is a Telegram auto-filter bot for indexing files from channels/groups
 
 ## Example `.env`
 
+Copy `.env.example` to `.env` and fill your real values:
+
+```bash
+cp .env.example .env
+```
+
 ```env
 BOT_TOKEN=123456:your_bot_token
 API_ID=123456
@@ -213,7 +219,13 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a `.env` file with your configuration, then run:
+Create a `.env` file from the example and add your configuration:
+
+```bash
+cp .env.example .env
+```
+
+Then run:
 
 ```bash
 python bot.py

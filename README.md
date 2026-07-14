@@ -204,6 +204,8 @@ Run the container:
 docker run --env-file .env -p 8080:8080 dreamxbotz
 ```
 
+For Docker Compose, `.env` is optional at compose-load time, but the bot still needs required variables from `.env` or your shell environment.
+
 ## Local Setup
 
 Create and activate a virtual environment:

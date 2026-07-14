@@ -1,4 +1,8 @@
-# DreamxBotz Auto Filter Bot
+<h1 align="center">DreamxBotz Auto Filter Bot</h1>
+
+<p align="center">
+  <b>Powerful Telegram auto-filter, file indexing, verification, premium, and streaming bot.</b>
+</p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/DreamXBotz/Pics/main/dreamxbotz.jpg" alt="DreamxBotz Logo" width="220">
@@ -22,7 +26,15 @@
   </a>
 </p>
 
-A Telegram auto-filter bot for indexing files from channels/groups, searching them quickly, and sharing files through Telegram bot commands. The project supports MongoDB storage, group settings, force subscription, verification, premium users, streaming links, and admin tools.
+<p align="center">
+  <img src="https://img.shields.io/badge/Auto%20Filter-Fast%20Search-ff69b4?style=flat-square" alt="Auto Filter">
+  <img src="https://img.shields.io/badge/MongoDB-Database-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB">
+  <img src="https://img.shields.io/badge/Streaming-Supported-orange?style=flat-square" alt="Streaming">
+  <img src="https://img.shields.io/badge/Premium-Enabled-purple?style=flat-square" alt="Premium">
+  <img src="https://img.shields.io/badge/Verification-3%20Step-red?style=flat-square" alt="Verification">
+</p>
+
+DreamxBotz is a Telegram auto-filter bot for indexing files from channels/groups, searching them quickly, and sharing files through bot commands. It supports MongoDB storage, group settings, force subscription, verification, premium users, streaming links, and admin tools.
 
 > This project is intended for educational use. Use it responsibly and follow Telegram rules, hosting provider rules, and copyright laws.
 
@@ -44,21 +56,21 @@ A Telegram auto-filter bot for indexing files from channels/groups, searching th
 
 ## Features
 
-- Auto file indexing from Telegram channels/groups
-- Fast auto-filter search in groups and private chat
-- MongoDB database support
-- Optional multiple database support
-- Force subscription support
-- Request-to-join force subscription support
-- Three-step verification support
-- Premium user management
-- Movie update notification tools
-- Stream and download link support
-- Group settings menu
-- Broadcast and group broadcast tools
-- User ban/unban and chat disable tools
-- Auto delete, file protection, and forward restriction options
-- Maintenance mode for admin-controlled downtime
+| Search & Indexing | Access Control | Admin Tools |
+| --- | --- | --- |
+| Fast auto-filter search | Force subscription | Broadcast tools |
+| Auto file indexing | Request-to-join FSub | User ban/unban |
+| Caption-based filtering | Three-step verification | Chat enable/disable |
+| Trending search list | Premium user support | Maintenance mode |
+| Movie/series search | PM search toggle | Logs and stats |
+
+| Media & Streaming | Database | Customization |
+| --- | --- | --- |
+| Online streaming links | MongoDB support | Group settings menu |
+| Fast download links | Multiple DB support | Custom captions |
+| Telegraph media info | User/chat database | IMDb templates |
+| TMDB movie metadata | Referral and premium data | Shortener settings |
+| Auto-delete tools | Search analytics | Tutorial links |
 
 ## Requirements
 
@@ -111,9 +123,11 @@ A Telegram auto-filter bot for indexing files from channels/groups, searching th
 | `PREMIUM_STREAM_MODE` | `False` | Restrict stream mode to premium users |
 | `MAINTENANCE` | `False` | Enable maintenance mode |
 | `IS_VERIFY` | `False` | Enable verification system |
-| `SHORTENER_API` | Built-in fallback | Shortener API key for verification links |
-| `SHORTENER_WEBSITE` | `omegalinks.in` | Shortener domain |
+| `SHORTENER_API` | Empty | Shortener API key for verification links |
+| `SHORTENER_WEBSITE` | Empty | Shortener domain |
 | `TMDB_API_KEY` | Empty | TMDB API key for movie metadata |
+| `TMDB_BEARER_TOKEN` | Empty | Optional TMDB bearer token |
+| `TELEGRAPH_ACCESS_TOKEN` | Empty | Optional Telegraph access token |
 
 ## Example `.env`
 
@@ -121,7 +135,7 @@ A Telegram auto-filter bot for indexing files from channels/groups, searching th
 BOT_TOKEN=123456:your_bot_token
 API_ID=123456
 API_HASH=your_api_hash
-DATABASE_URI=mongodb+srv://user:password@cluster.mongodb.net/
+DATABASE_URI=mongodb+srv://username:db-password@cluster.mongodb.net/
 DATABASE_NAME=Cluster0
 COLLECTION_NAME=dreamcinezone_files
 ADMINS=123456789
@@ -134,6 +148,10 @@ NO_PORT=True
 ```
 
 ## Deploy On Render
+
+<p>
+  <img src="https://img.shields.io/badge/Render-Docker%20Deploy-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Render Deploy">
+</p>
 
 1. Fork or upload this repository to GitHub.
 2. Create a new Render Web Service.
@@ -151,6 +169,10 @@ NO_PORT=True
 
 ## Deploy On Heroku
 
+<p>
+  <img src="https://img.shields.io/badge/Heroku-Supported-430098?style=for-the-badge&logo=heroku&logoColor=white" alt="Heroku Supported">
+</p>
+
 This repository includes `app.json`, `Procfile`, and `heroku.yml`, so it can also run on Heroku-style deployments.
 
 1. Create a Heroku app.
@@ -159,6 +181,10 @@ This repository includes `app.json`, `Procfile`, and `heroku.yml`, so it can als
 4. Ensure the worker or web process is enabled according to your hosting setup.
 
 ## Deploy With Docker
+
+<p>
+  <img src="https://img.shields.io/badge/Docker-Build%20%26%20Run-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Build">
+</p>
 
 Build the image:
 
@@ -195,43 +221,107 @@ python bot.py
 
 ## Commands
 
+<p>
+  <img src="https://img.shields.io/badge/User%20Commands-Available-2ea44f?style=flat-square" alt="User Commands">
+  <img src="https://img.shields.io/badge/Admin%20Commands-Available-d73a49?style=flat-square" alt="Admin Commands">
+</p>
+
 ### User Commands
 
 | Command | Description |
 | --- | --- |
 | `/start` | Start the bot |
 | `/settings` | Open group settings |
-| `/stats` | Show database stats |
 | `/id` | Get Telegram ID |
 | `/info` | Get user information |
-| `/top` | Show top searched items |
-| `/link` | Create a single file link |
-| `/batch` | Create batch file links |
+| `/imdb` | Search IMDb/movie details |
+| `/search` | Search IMDb/movie details |
+| `/movies` | Search movie titles in private chat |
+| `/series` | Search series titles in private chat |
+| `/plan` | View premium plans |
+| `/myplan` | Check active premium plan |
+| `/redeem` | Redeem a premium code |
+| `/font` | Generate styled text in private chat |
+| `/img` | Upload replied media to Telegraph |
+| `/cup` | Upload replied media to Telegraph |
+| `/telegraph` | Upload replied media to Telegraph |
+| `/stickerid` | Get sticker file ID |
+| `/alive` | Check bot status |
+| `/ping` | Check bot response time |
+| `/system` | Show system information |
+| `/request` | Send a group request report |
+| `#request` | Send a group request report |
 
 ### Admin Commands
 
 | Command | Description |
 | --- | --- |
+| `/stats` | Show database stats |
+| `/logs` | Get bot logs |
+| `/commands` | Set bot command menu |
 | `/movie_update` | Toggle movie update notifications |
 | `/pm_search` | Toggle private message search |
-| `/verification` | Show verified user count |
+| `/verify` | Manage verification status |
 | `/delete` | Delete a specific file from database |
 | `/deleteall` | Delete all files from database |
 | `/deletefiles` | Delete PreDVD/CamRip files |
+| `/save` | Save replied file to the bot |
+| `/send` | Send a message to a user |
+| `/post` | Create a formatted post from a replied file |
+| `/setskip` | Set skip count for indexing forwarded links |
 | `/broadcast` | Broadcast to users |
 | `/grp_broadcast` | Broadcast to groups |
+| `/clear_junk` | Clean junk users |
+| `/junk_group` | Clean junk groups |
+| `/clear_junk_group` | Clean junk groups |
+| `/clean_groups` | Clean invalid or inactive groups |
 | `/ban` | Ban a user |
 | `/unban` | Unban a user |
+| `/banned` | List banned users |
+| `/users` | List saved users |
+| `/chats` | List saved chats |
+| `/invite` | Create invite link for a chat |
+| `/enable` | Enable a disabled group |
+| `/disable` | Disable a group |
+| `/leave` | Make bot leave a group |
 | `/add_premium` | Add premium access |
+| `/get_premium` | Generate premium payment link |
 | `/remove_premium` | Remove premium access |
 | `/premium_users` | List premium users |
+| `/add_redeem` | Create redeem code |
 | `/restart` | Restart the bot |
+| `/reload` | Reload group settings |
+| `/del_msg` | Delete bot messages |
 | `/maintenance` | Toggle maintenance mode |
-| `/reset_group` | Reset group settings |
+| `/group_cmd` | Show group command list |
+| `/admin_cmd` | Show admin command list |
+| `/top_search` | Show top searched items |
+| `/trendlist` | Show trending searches |
+| `/set_template` | Set IMDb template |
+| `/set_caption` | Set custom file caption |
+| `/set_tutorial` | Set first verification tutorial link |
+| `/set_tutorial_2` | Set second verification tutorial link |
+| `/set_tutorial_3` | Set third verification tutorial link |
+| `/set_shortner` | Set first shortener |
+| `/set_shortner_2` | Set second shortener |
+| `/set_shortner_3` | Set third shortener |
+| `/set_log_channel` | Set group log channel |
+| `/set_time` | Set second verification gap |
+| `/set_time_2` | Set third verification gap |
+| `/details` | Show group verification settings |
+| `/set_fsub` | Set force subscription channels |
+| `/resetallgroup` | Reset all group settings |
 | `/trial_reset` | Reset user trial |
 | `/remove_fsub` | Remove force subscription from a group |
+| `/delreq` | Delete saved join requests |
+
+Indexing is handled by forwarding channel messages or sending supported Telegram message links to the bot in private chat.
 
 ## Public Repo Safety
+
+<p>
+  <img src="https://img.shields.io/badge/Security-Keep%20Secrets%20Private-critical?style=for-the-badge" alt="Security">
+</p>
 
 - Do not commit `.env`, session files, logs, or virtual environments.
 - Rotate any token or API key that was previously committed publicly.
@@ -240,13 +330,9 @@ python bot.py
 
 ## Troubleshooting
 
-### `AttributeError: 'NoneType' object has no attribute 'lower'`
+### Bot does not start
 
-This happens when a boolean environment variable is missing and the parser tries to call `.lower()` on `None`. The helper in `info.py` should return the default value when an env var is not set.
-
-### `ValueError` near `API_ID`
-
-Set a valid numeric `API_ID` in your environment variables.
+Check that `BOT_TOKEN`, `API_ID`, `API_HASH`, `DATABASE_URI`, `LOG_CHANNEL`, and `ADMINS` are set correctly.
 
 ### MongoDB connection error
 

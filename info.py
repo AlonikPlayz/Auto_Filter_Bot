@@ -7,9 +7,12 @@ from Script import script
 id_pattern = re.compile(r'^.\d+$')
 
 def is_enabled(value, default):
-    if value.lower() in ["true", "yes", "1", "enable", "y"]:
+    if value is None:
+        return default
+    value = str(value).strip().lower()
+    if value in ["true", "yes", "1", "enable", "y"]:
         return True
-    elif value.lower() in ["false", "no", "0", "disable", "n"]:
+    elif value in ["false", "no", "0", "disable", "n"]:
         return False
     else:
         return default

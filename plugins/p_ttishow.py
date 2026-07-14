@@ -1,3 +1,4 @@
+import logging
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
@@ -6,6 +7,8 @@ from database.users_chats_db import db, db2
 from database.ia_filterdb import Media, Media2, db as db_stats, db2 as db2_stats, client, client2
 from utils import get_size, temp, get_settings, get_readable_time
 from Script import script
+
+logger = logging.getLogger(__name__)
 from pyrogram.errors import ChatAdminRequired
 import asyncio
 import psutil
@@ -31,7 +34,7 @@ async def save_group(bot, message):
             k = await message.reply(text=script.CHAT_RESTRICTED_TXT, reply_markup=reply_markup)
             try:
                 await k.pin()
-            except:
+            except Exception:
                 pass
             await bot.leave_chat(message.chat.id)
             return
@@ -54,7 +57,7 @@ async def save_group(bot, message):
                 if temp.MELCOW.get('welcome'):
                     try:
                         await temp.MELCOW['welcome'].delete()
-                    except:
+                    except Exception:
                         pass
                 try:
                     temp.MELCOW['welcome'] = await message.reply_photo(
@@ -65,14 +68,14 @@ async def save_group(bot, message):
                                     InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ 📌", url=OWNER_LNK)
                                 ]]),parse_mode=enums.ParseMode.HTML)
                 except Exception as e:
-                    print(f"Welcome photo send failed: {e}")
+                    logger.error("Welcome photo send failed: %s", e)
         if settings.get("auto_delete"):
             await asyncio.sleep(600)
             try:
                 if temp.MELCOW.get('welcome'):
                     await temp.MELCOW['welcome'].delete()
                     temp.MELCOW['welcome'] = None 
-            except:
+            except Exception:
                 pass
                
 @Client.on_message(filters.command('leave') & filters.user(ADMINS))
@@ -82,7 +85,7 @@ async def leave_a_chat(bot, message):
     chat = message.command[1]
     try:
         chat = int(chat)
-    except:
+    except Exception:
         chat = chat
     try:
         buttons = [[
@@ -113,7 +116,7 @@ async def disable_chat(bot, message):
         reason = "No reason Provided"
     try:
         chat_ = int(chat)
-    except:
+    except Exception:
         return await message.reply('Give Me A Valid Chat ID')
     cha_t = await db.get_chat(int(chat_))
     if not cha_t:
@@ -144,7 +147,7 @@ async def re_enable_chat(bot, message):
     chat = message.command[1]
     try:
         chat_ = int(chat)
-    except:
+    except Exception:
         return await message.reply('Give Me A Valid Chat ID')
     sts = await db.get_chat(int(chat))
     if not sts:
@@ -212,7 +215,7 @@ async def get_stats(bot, message):
             uptime, ram, cpu, (int(file1) + int(file2))
             ))
     except Exception as e:
-       print(f"Error In stats :- {e}")        
+       logger.error("Error In stats: %s", e)        
 
 @Client.on_message(filters.command('invite') & filters.user(ADMINS))
 async def gen_invite(bot, message):
@@ -221,7 +224,7 @@ async def gen_invite(bot, message):
     chat = message.command[1]
     try:
         chat = int(chat)
-    except:
+    except Exception:
         return await message.reply('Give Me A Valid Chat ID')
     try:
         link = await bot.create_chat_invite_link(chat)
@@ -244,7 +247,7 @@ async def ban_a_user(bot, message):
         reason = "No reason Provided"
     try:
         chat = int(chat)
-    except:
+    except Exception:
         pass
     try:
         k = await bot.get_users(chat)
@@ -277,7 +280,7 @@ async def unban_a_user(bot, message):
         reason = "No reason Provided"
     try:
         chat = int(chat)
-    except:
+    except Exception:
         pass
     try:
         k = await bot.get_users(chat)

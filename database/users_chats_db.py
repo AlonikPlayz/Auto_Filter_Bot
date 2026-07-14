@@ -1,4 +1,5 @@
 import datetime
+import logging
 import pytz  
 import motor.motor_asyncio
 from info import (
@@ -10,6 +11,8 @@ from info import (
     MOVIE_UPDATE_NOTIFICATION
 )
 
+
+logger = logging.getLogger(__name__)
 
 class Database:    
     def __init__(self, uri, database_name):
@@ -36,7 +39,7 @@ class Database:
 
     async def delete_all_msg(self):
         await self.movie_updates.delete_many({})
-        print("All filenames notification have been deleted.")
+        logger.info("All filenames notification have been deleted.")
         return True
  
      
@@ -201,7 +204,7 @@ class Database:
             )
             return result.modified_count
         except Exception as e:
-            print(f"[ERROR] Failed to reset group settings: {e}")
+            logger.error("Failed to reset group settings: %s", e)
             raise  
 
     async def disable_chat(self, chat, reason="No Reason"):
@@ -351,7 +354,7 @@ class Database:
             result = await self.users.update_one(filter_query, update_data)
             return result.matched_count == 1
         except Exception as e:
-            print(f"Error updating document: {e}")
+            logger.error("Error updating document: %s", e)
             return False
 
     async def get_expired(self, current_time):

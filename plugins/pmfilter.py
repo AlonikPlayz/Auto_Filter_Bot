@@ -371,7 +371,7 @@ async def advantage_spoll_choker(bot, query):
             try:
                 await bot.send_message(chat_id=BIN_CHANNEL, text=script.NORSLTS.format(reqstr.id, reqstr.mention, movie))
             except Exception as e:
-                print(f"Error In Spol - {e}   Make Sure Bot Admin BIN CHANNEL")
+                logger.error("Error In Spol: %s — Make Sure Bot Admin BIN CHANNEL", e)
         btn = InlineKeyboardMarkup(
             [[InlineKeyboardButton("🔰Cʟɪᴄᴋ ʜᴇʀᴇ & ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ🔰", url=OWNER_LNK)]])
         k = await query.message.edit(script.MVE_NT_FND, reply_markup=btn)
@@ -388,7 +388,7 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
                 f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
                 show_alert=True,
             )
-    except:
+    except Exception:
         pass
 
     _, key = query.data.split("#")
@@ -434,7 +434,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
     try:
         if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
             return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
-    except:
+    except Exception:
         pass
     if qual != "homepage":
         search = f"{search} {qual}"
@@ -548,7 +548,7 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
                 f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
                 show_alert=True,
             )
-    except:
+    except Exception:
         pass
 
     _, key = query.data.split("#")
@@ -593,7 +593,7 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
     try:
         if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
             return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
-    except:
+    except Exception:
         pass
     if lang != "homepage":
         search = f"{search} {lang}"
@@ -840,12 +840,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
     DreamxData = query.data
     try:
         link = await client.create_chat_invite_link(int(REQST_CHANNEL))
-    except:
+    except Exception:
         pass
     if query.data == "close_data":
         try:
             user = query.message.reply_to_message.from_user.id
-        except:
+        except Exception:
             user = query.from_user.id
         if int(user) != 0 and query.from_user.id != int(user):
             return await query.answer(script.NT_ALRT_TXT, show_alert=True)
@@ -853,7 +853,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.delete()
         try:
             await query.message.reply_to_message.delete()
-        except:
+        except Exception:
             pass
 
     elif query.data == "pages":
@@ -875,7 +875,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await query.message.delete()
                 try:
                     await query.message.reply_to_message.delete()
-                except:
+                except Exception:
                     pass
             else:
                 await query.answer("Tʜᴀᴛ's ɴᴏᴛ ғᴏʀ ʏᴏᴜ!!", show_alert=True)
@@ -988,7 +988,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     if deleted % 20 == 0:
                         await query.message.edit_text(f"<b>ᴘʀᴏᴄᴇꜱꜱ ꜱᴛᴀʀᴛᴇᴅ ꜰᴏʀ ᴅᴇʟᴇᴛɪɴɢ ꜰɪʟᴇꜱ ꜰʀᴏᴍ ᴅʙ. ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ {str(deleted)} ꜰɪʟᴇꜱ ꜰʀᴏᴍ ᴅʙ ꜰᴏʀ ʏᴏᴜʀ ǫᴜᴇʀʏ {keyword} !\n\nᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ...</b>")
             except Exception as e:
-                print(f"Error In killfiledq -{e}")
+                logger.error("Error In killfiledq: %s", e)
                 await query.message.edit_text(f'Error: {e}')
             else:
                 await query.message.edit_text(f"<b>ᴘʀᴏᴄᴇꜱꜱ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ꜰᴏʀ ꜰɪʟᴇ ᴅᴇʟᴇᴛᴀᴛɪᴏɴ !\n\nꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ {str(deleted)} ꜰɪʟᴇꜱ ꜰʀᴏᴍ ᴅʙ ꜰᴏʀ ʏᴏᴜʀ ǫᴜᴇʀʏ {keyword}.</b>")
@@ -1191,7 +1191,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await dreamcinezone.delete()
             return
         except Exception as e:
-            print(e)
+            logger.error("Callback error: %s", e)
             await query.answer(f"⚠️ SOMETHING WENT WRONG STREAM LINK  \n\n{e}", show_alert=True)
             return
 
@@ -1472,7 +1472,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                         text=Chat.title, callback_data=f"grp_pm#{Chat.id}")
                 ])
             except Exception as e:
-                print(f"Error In PM Settings Button - {e}")
+                logger.error("Error In PM Settings Button: %s", e)
                 pass
         await query.edit_message_text(
             "⚠️ ꜱᴇʟᴇᴄᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ᴡʜᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʜᴀɴɢᴇ.\n\n"

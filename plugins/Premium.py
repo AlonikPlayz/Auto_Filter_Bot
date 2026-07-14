@@ -1,4 +1,5 @@
 
+import logging
 import pytz
 import datetime
 from Script import script 
@@ -15,6 +16,8 @@ from pyrogram.types import (
     LabeledPrice,
     PreCheckoutQuery,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @Client.on_message(filters.command("remove_premium") & filters.user(ADMINS))
@@ -81,7 +84,7 @@ async def myplan(client, message):
                 )
             )
     except Exception as e:
-        print(e)
+        logger.error("myplan error: %s", e)
 
 @Client.on_message(filters.command("get_premium") & filters.user(ADMINS))
 async def get_premium(client, message):
@@ -225,12 +228,12 @@ async def premium_button(client, callback_query: CallbackQuery):
                 )
                 await callback_query.answer()
             except Exception as e:
-                print(f"Error sending invoice: {e}")
+                logger.error("Error sending invoice: %s", e)
                 await callback_query.answer("🚫 Error Processing Your Payment. Try again.", show_alert=True)
         else:
             await callback_query.answer("⚠️ Invalid Premium Package.", show_alert=True)
     except Exception as e:
-        print(f"Error In buy_ - {e}")
+        logger.error("Error In buy_: %s", e)
  
 @Client.on_pre_checkout_query()
 async def pre_checkout_handler(client, query: PreCheckoutQuery):
@@ -240,7 +243,7 @@ async def pre_checkout_handler(client, query: PreCheckoutQuery):
         else:
             await query.answer(success=False, error="⚠️ Invalid Purchase Type.")
     except Exception as e:
-        print(f"Pre-checkout error: {e}")
+        logger.error("Pre-checkout error: %s", e)
         await query.answer(success=False, error="🚫 Unexpected Error Occurred.")
 
 @Client.on_message(filters.successful_payment)
@@ -267,7 +270,7 @@ async def successful_premium_payment(client, message):
         else:
             await message.reply("⚠️ Invalid Premium Package.")
     except Exception as e:
-        print(f"Error Processing Premium Payment: {e}")
+        logger.error("Error Processing Premium Payment: %s", e)
         await message.reply("✅ Thank You For Your Payment! (Error Logging Details)")
 
 

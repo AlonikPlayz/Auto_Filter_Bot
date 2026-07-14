@@ -11,15 +11,15 @@ async def initialize_clients():
     work_loads[0] = 0
     all_tokens = TokenParser().parse_from_env()
     if not all_tokens:
-        print("No additional clients found, using default client")
+        logging.info("No additional clients found, using default client")
         return
     
     async def start_client(client_id, token):
         try:
-            print(f"Starting - Client {client_id}")
+            logging.info("Starting - Client %s", client_id)
             if client_id == len(all_tokens):
                 await asyncio.sleep(2)
-                print("This will take some time, please wait...")
+                logging.info("This will take some time, please wait...")
             client = await Client(
                 name=str(client_id),
                 api_id=API_ID,
@@ -38,6 +38,6 @@ async def initialize_clients():
     multi_clients.update(dict(clients))
     if len(multi_clients) != 1:
         MULTI_CLIENT = True
-        print("Multi-Client Mode Enabled")
+        logging.info("Multi-Client Mode Enabled")
     else:
-        print("No additional clients were initialized, using default client")
+        logging.info("No additional clients were initialized, using default client")

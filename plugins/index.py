@@ -46,7 +46,7 @@ async def index_files(bot, query):
     )
     try:
         chat = int(chat)
-    except:
+    except Exception:
         chat = chat
     await index_files_to_db(int(lst_msg_id), chat, msg, bot)
 
@@ -78,7 +78,7 @@ async def send_for_index(bot, message):
         return await message.reply(f'Errors - {e}')
     try:
         k = await bot.get_messages(chat_id, last_msg_id)
-    except:
+    except Exception:
         return await message.reply('Make Sure That Iam An Admin In The Channel, if channel is private')
     if k.empty:
         return await message.reply('This may be group and i am not a admin of the group.')
@@ -117,7 +117,7 @@ async def set_skip_number(bot, message):
         _, skip = message.text.split(" ")
         try:
             skip = int(skip)
-        except:
+        except Exception:
             return await message.reply("Skip number should be an integer.")
         await message.reply(f"Successfully set SKIP number as {skip}")
         temp.CURRENT = int(skip)

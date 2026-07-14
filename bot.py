@@ -54,7 +54,8 @@ async def dreamxbotz_start():
     await initialize_clients()
     plugins_names = get_plugins_names()
     if plugins_names:
-        logging.info("Plugins Found (%d): %s", len(plugins_names), ", ".join(plugins_names))
+        plugins_list = "\n".join(f"  {i}. {name}" for i, name in enumerate(plugins_names, 1))
+        logging.info("Plugins Found (%d):\n%s", len(plugins_names), plugins_list)
     else:
         logging.warning("No plugins found.")
 

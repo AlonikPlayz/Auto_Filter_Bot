@@ -135,7 +135,7 @@ async def is_check_admin(bot, chat_id, user_id):
     try:
         member = await bot.get_chat_member(chat_id, user_id)
         return member.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
-    except:
+    except Exception:
         return False
     
 async def users_broadcast(user_id, message, is_pin):
@@ -168,7 +168,7 @@ async def groups_broadcast(chat_id, message, is_pin):
         if is_pin:
             try:
                 await m.pin()
-            except:
+            except Exception:
                 pass
         return "Success"
     except FloodWait as e:
@@ -789,7 +789,7 @@ def gfilterparser(text, keyword):
 
     try:
         return note_data, buttons, alerts
-    except:
+    except Exception:
         return note_data, buttons, None
 
 def parser(text, keyword):
@@ -841,7 +841,7 @@ def parser(text, keyword):
 
     try:
         return note_data, buttons, alerts
-    except:
+    except Exception:
         return note_data, buttons, None
 
 def remove_escapes(text: str) -> str:
@@ -864,7 +864,7 @@ async def log_error(client, error_message):
             text=f"<b>⚠️ Error Log:</b>\n<code>{error_message}</code>"
         )
     except Exception as e:
-        print(f"Failed to log error: {e}")
+        logger.error("Failed to log error: %s", e)
 
 
 def get_time(seconds):

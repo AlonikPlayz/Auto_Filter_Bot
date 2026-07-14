@@ -11,6 +11,7 @@ from info import ADMINS
 from utils import users_broadcast, groups_broadcast, temp, get_readable_time, clear_junk, junk_group
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 
+logger = logging.getLogger(__name__)
 lock = asyncio.Lock()
 
 @Client.on_callback_query(filters.regex(r'^broadcast_cancel'))
@@ -229,7 +230,7 @@ async def junk_clear_group(bot, message):
                 try:
                     await bot.leave_chat(int(group['id']))
                 except Exception as e:
-                    print(f"{e} > {group['id']}")  
+                    logger.warning("%s > %s", e, group['id'])  
         done += 1
         if not done % 50:
             await sts.edit(f"in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}")    

@@ -31,7 +31,7 @@ async def check_expired_premium(client):
                 )
                 await client.send_message(PREMIUM_LOGS, text=f"<b>#Premium_Expire\n\nUser name: {user.mention}\nUser id: <code>{user_id}</code>")
             except Exception as e:
-                print(e)
+                logging.error("Premium expire notification error: %s", e)
             await sleep(0.5)
         await sleep(1)
 

@@ -381,8 +381,9 @@ async def advantage_spoll_choker(bot, query):
 # Qualities
 @Client.on_callback_query(filters.regex(r"^qualities#"))
 async def qualities_cb_handler(client: Client, query: CallbackQuery):
+    _, req, key = query.data.split("#")
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer(
                 f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\n"
                 f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
@@ -391,7 +392,6 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
     except Exception:
         pass
 
-    _, key = query.data.split("#")
     search = FRESH.get(key)
     search = search.replace(' ', '_')
 
@@ -399,11 +399,11 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
     for i in range(0, len(QUALITIES), 2):
         q1 = QUALITIES[i]
         row = [InlineKeyboardButton(
-            text=q1, callback_data=f"fq#{q1.lower()}#{key}")]
+            text=q1, callback_data=f"fq#{q1.lower()}#{req}#{key}")]
         if i + 1 < len(QUALITIES):
             q2 = QUALITIES[i + 1]
             row.append(InlineKeyboardButton(
-                text=q2, callback_data=f"fq#{q2.lower()}#{key}"))
+                text=q2, callback_data=f"fq#{q2.lower()}#{req}#{key}"))
         btn.append(row)
 
     btn.insert(0, [
@@ -411,7 +411,7 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
     ])
     btn.append([
         InlineKeyboardButton(text="↭ ʙᴀᴄᴋ ᴛᴏ ꜰɪʟᴇs ↭",
-                             callback_data=f"fq#homepage#{key}")
+                             callback_data=f"fq#homepage#{req}#{key}")
     ])
 
     await query.edit_message_reply_markup(InlineKeyboardMarkup(btn))
@@ -419,7 +419,7 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^fq#"))
 async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
-    _, qual, key = query.data.split("#")
+    _, qual, req, key = query.data.split("#")
     curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
     search = FRESH.get(key)
     search = search.replace("_", " ")
@@ -428,11 +428,10 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         search = search.replace(qual, "")
     else:
         search = search
-    req = query.from_user.id
     chat_id = query.message.chat.id
     message = query.message
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
     except Exception:
         pass
@@ -456,11 +455,11 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn.insert(0,
                    [
                        InlineKeyboardButton(
-                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                    ]
                    )
         btn.insert(0,
@@ -475,11 +474,11 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn.insert(0,
                    [
                        InlineKeyboardButton(
-                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                    ]
                    )
         btn.insert(0,
@@ -541,8 +540,9 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^languages#"))
 async def languages_cb_handler(client: Client, query: CallbackQuery):
+    _, req, key = query.data.split("#")
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer(
                 f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\n"
                 f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
@@ -551,7 +551,6 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
     except Exception:
         pass
 
-    _, key = query.data.split("#")
     search = FRESH.get(key)
     search = search.replace(' ', '_')
 
@@ -561,24 +560,24 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
     for i in range(0, len(items), 2):
         name1, code1 = items[i]
         row = [InlineKeyboardButton(
-            text=name1, callback_data=f"fl#{code1}#{key}")]
+            text=name1, callback_data=f"fl#{code1}#{req}#{key}")]
         if i + 1 < len(items):
             name2, code2 = items[i + 1]
             row.append(InlineKeyboardButton(
-                text=name2, callback_data=f"fl#{code2}#{key}"))
+                text=name2, callback_data=f"fl#{code2}#{req}#{key}"))
         btn.append(row)
 
     btn.insert(0, [InlineKeyboardButton(
         text="⇊ ꜱᴇʟᴇᴄᴛ ʟᴀɴɢᴜᴀɢᴇ ⇊", callback_data="ident")])
     btn.append([InlineKeyboardButton(text="↭ ʙᴀᴄᴋ ᴛᴏ ꜰɪʟᴇs ↭",
-               callback_data=f"fl#homepage#{key}")])
+               callback_data=f"fl#homepage#{req}#{key}")])
 
     await query.edit_message_reply_markup(InlineKeyboardMarkup(btn))
 
 
 @Client.on_callback_query(filters.regex(r"^fl#"))
 async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
-    _, lang, key = query.data.split("#")
+    _, lang, req, key = query.data.split("#")
     curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
     search = FRESH.get(key)
     search = search.replace("_", " ")
@@ -587,11 +586,10 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         search = search.replace(lang, "")
     else:
         search = search
-    req = query.from_user.id
     chat_id = query.message.chat.id
     message = query.message
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
     except Exception:
         pass
@@ -615,11 +613,11 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         btn.insert(0,
                    [
                        InlineKeyboardButton(
-                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                    ]
                    )
         btn.insert(0,
@@ -635,11 +633,11 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         btn.insert(0,
                    [
                        InlineKeyboardButton(
-                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                        InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                    ])
         btn.insert(0,
                    [
@@ -694,24 +692,23 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^seasons#"))
 async def seasons_cb_handler(client: Client, query: CallbackQuery):
+    _, req, key = query.data.split("#")
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer(
                 f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ…",
                 show_alert=True,
             )
     except Exception:
         pass
-    _, key = query.data.split("#")
-    req = query.from_user.id
     offset = 0
     btn: list[list[InlineKeyboardButton]] = []
     for i in range(0, len(SEASONS) - 1, 2):
         btn.append([
             InlineKeyboardButton(
-                f"Sᴇᴀꜱᴏɴ {SEASONS[i][1:]}", callback_data=f"fs#{SEASONS[i].lower()}#{key}"),
+                f"Sᴇᴀꜱᴏɴ {SEASONS[i][1:]}", callback_data=f"fs#{SEASONS[i].lower()}#{req}#{key}"),
             InlineKeyboardButton(
-                f"Sᴇᴀꜱᴏɴ {SEASONS[i+1][1:]}", callback_data=f"fs#{SEASONS[i+1].lower()}#{key}")
+                f"Sᴇᴀꜱᴏɴ {SEASONS[i+1][1:]}", callback_data=f"fs#{SEASONS[i+1].lower()}#{req}#{key}")
         ])
 
     btn.insert(
@@ -726,7 +723,7 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^fs#"))
 async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
-    _, season_tag, key = query.data.split("#")
+    _, season_tag, req, key = query.data.split("#")
     search = FRESH.get(key).replace("_", " ")
     season_tag = season_tag.lower()
     if season_tag == "homepage":
@@ -739,13 +736,12 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
 
     BUTTONS[key] = search_final
     try:
-        if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
+        if int(req) not in [query.from_user.id, 0]:
             return await query.answer("⚠️ Not your request", show_alert=True)
     except Exception:
         pass
 
     chat_id = query.message.chat.id
-    req = query.from_user.id
     files, n_offset, total_results = await get_search_results(chat_id, query_input, offset=0, filter=True)
     if not files:
         BUTTONS[key] = None
@@ -770,9 +766,9 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     btn.insert(
         0,
         [
-            InlineKeyboardButton("Qᴜᴀʟɪᴛʏ", callback_data=f"qualities#{key}"),
-            InlineKeyboardButton("Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
-            InlineKeyboardButton("Sᴇᴀꜱᴏɴ", callback_data=f"seasons#{key}"),
+            InlineKeyboardButton("Qᴜᴀʟɪᴛʏ", callback_data=f"qualities#{req}#{key}"),
+            InlineKeyboardButton("Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
+            InlineKeyboardButton("Sᴇᴀꜱᴏɴ", callback_data=f"seasons#{req}#{key}"),
         ],
     )
     btn.insert(
@@ -954,7 +950,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 )
                 return
             await query.answer(url=f"https://t.me/{temp.U_NAME}?start={kk}_{file_id}")
-            await query.message.delete()
+            if query.message.chat.type == enums.ChatType.PRIVATE:
+                await query.message.delete()
         except Exception as e:
             await log_error(client, f"❌ Error in checksub callback:\n\n{repr(e)}")
             logger.error(f"❌ Error in checksub callback:\n\n{repr(e)}")
@@ -1162,7 +1159,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             user_id = query.from_user.id
             username = query.from_user.mention
             log_msg = await client.send_cached_media(chat_id=BIN_CHANNEL, file_id=file_id,)
-            fileName = {quote_plus(get_name(log_msg))}
+            fileName = quote_plus(get_name(log_msg))
             dreamx_stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
             dreamx_download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
             await query.answer(MSG_ALRT)
@@ -1577,6 +1574,7 @@ async def auto_filter(client, msg, spoll=False):
         key = f"{message.chat.id}-{message.id}"
         FRESH[key] = search
         temp.GETALL[key] = files
+        req = message.from_user.id if message.from_user else 0
         temp.SHORT[message.from_user.id] = message.chat.id
         if settings.get('button'):
             btn = [
@@ -1589,11 +1587,11 @@ async def auto_filter(client, msg, spoll=False):
             btn.insert(0,
                        [
                            InlineKeyboardButton(
-                               'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                               'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                            InlineKeyboardButton(
-                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                            InlineKeyboardButton(
-                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                        ]
                        )
             btn.insert(0,
@@ -1609,11 +1607,11 @@ async def auto_filter(client, msg, spoll=False):
             btn.insert(0,
                        [
                            InlineKeyboardButton(
-                               'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                               'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{req}#{key}"),
                            InlineKeyboardButton(
-                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{req}#{key}"),
                            InlineKeyboardButton(
-                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{req}#{key}")
                        ]
                        )
             btn.insert(0,

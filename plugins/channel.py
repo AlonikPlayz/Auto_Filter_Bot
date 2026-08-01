@@ -376,14 +376,24 @@ async def send_movie_update(bot, base_name):
             size=(2560, 1440) if LANDSCAPE_POSTER and TMDB_POSTER and movie_doc.get("is_backdrop") and not movie_doc.get("error_tmdb") else (853, 1280)
             if movie_doc.get("poster_url") and not LINK_PREVIEW:
                 resized_poster = await fetch_image(movie_doc["poster_url"], size)
-                msg = await bot.send_photo(
-                    chat_id=MOVIE_UPDATE_CHANNEL,
-                    photo=resized_poster,
-                    caption=text,
-                    reply_markup=buttons,
-                    parse_mode=enums.ParseMode.HTML
-                )
-                is_photo = True
+                if resized_poster:
+                    msg = await bot.send_photo(
+                        chat_id=MOVIE_UPDATE_CHANNEL,
+                        photo=resized_poster,
+                        caption=text,
+                        reply_markup=buttons,
+                        parse_mode=enums.ParseMode.HTML
+                    )
+                    is_photo = True
+                else:
+                    send_params = {
+                        "chat_id": MOVIE_UPDATE_CHANNEL,
+                        "text": text,
+                        "reply_markup": buttons,
+                        "parse_mode": enums.ParseMode.HTML
+                    }
+                    msg = await bot.send_message(**send_params)
+                    is_photo = False
             else:
                 send_params = {
                     "chat_id": MOVIE_UPDATE_CHANNEL,

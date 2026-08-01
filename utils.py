@@ -1066,7 +1066,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                 )
 
             cap += "\n\n<u>Your Requested Files Are Here</u>\n\n</b>"
-            for idx, file in enumerate(files, start=offset):
+            for idx, file in enumerate(files, start=offset + 1):
                         cap += (
                             f"<b>{idx}. "
                             f"<a href='https://telegram.me/{temp.U_NAME}"

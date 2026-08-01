@@ -66,7 +66,6 @@ async def fetch_image(url, size=(860, 1200)):
 
 
 async def close_session():
-    global _session
     if _session and not _session.closed:
         await _session.close()
 

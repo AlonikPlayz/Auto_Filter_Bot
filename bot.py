@@ -97,10 +97,11 @@ async def dreamxbotz_start():
         await idle()
     finally:
         await app.cleanup()
+        await dreamxbotz.stop()
 
 if __name__ == '__main__':
     try:
-        dreamxbotz.run(dreamxbotz_start())
+        dreamxbotz.loop.run_until_complete(dreamxbotz_start())
     except FloodWait as e:
         logging.info(f"FloodWait! Sleeping for {e.value} seconds.")
         time.sleep(e.value)

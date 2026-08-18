@@ -1,4 +1,4 @@
-from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_short_settings_text
+from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_settings_text
 from rapidfuzz import process
 from dreamxbotz.util.file_properties import get_name, get_hash
 from urllib.parse import quote_plus
@@ -964,7 +964,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             btn = await group_setting_buttons(int(grp_id))
             reply_markup = InlineKeyboardMarkup(btn)
             await query.message.edit_text(
-                text=await get_short_settings_text(grp_id, title),
+                text=await get_settings_text(grp_id, title),
                 disable_web_page_preview=True,
                 parse_mode=enums.ParseMode.HTML
             )
@@ -995,7 +995,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup = InlineKeyboardMarkup(btn)
             await client.send_message(
                 chat_id=userid,
-                text=await get_short_settings_text(grp_id, title),
+                text=await get_settings_text(grp_id, title),
                 reply_markup=reply_markup,
                 disable_web_page_preview=True,
                 parse_mode=enums.ParseMode.HTML,
@@ -1399,7 +1399,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         btn = await group_setting_buttons(int(grp_id))
         dreamx = await client.get_chat(int(grp_id))
-        await query.message.edit(text=await get_short_settings_text(grp_id, dreamx.title), reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        await query.message.edit(text=await get_settings_text(grp_id, dreamx.title), reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
 
     elif query.data.startswith("removegrp"):
         user_id = query.from_user.id

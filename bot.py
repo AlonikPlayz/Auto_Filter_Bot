@@ -77,7 +77,7 @@ async def dreamxbotz_start():
     temp.B_NAME = me.first_name
     temp.B_LINK = me.mention
     dreamxbotz.username = '@' + me.username
-    dreamxbotz.loop.create_task(check_expired_premium(dreamxbotz))
+    asyncio.create_task(check_expired_premium(dreamxbotz))
     
     logging.info(f"{me.first_name} with Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
     logging.info(LOG_STR)
@@ -91,7 +91,7 @@ async def dreamxbotz_start():
     await app.setup()
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
-    dreamxbotz.loop.create_task(keep_alive())
+    asyncio.create_task(keep_alive())
 
     try:
         await idle()
@@ -101,7 +101,7 @@ async def dreamxbotz_start():
 
 if __name__ == '__main__':
     try:
-        dreamxbotz.loop.run_until_complete(dreamxbotz_start())
+        asyncio.run(dreamxbotz_start())
     except FloodWait as e:
         logging.info(f"FloodWait! Sleeping for {e.value} seconds.")
         time.sleep(e.value)

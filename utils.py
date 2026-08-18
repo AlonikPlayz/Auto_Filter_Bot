@@ -4,7 +4,7 @@ import logging
 import random
 import string
 from info import ULTRA_FAST_MODE, MAX_LIST_ELM, BAD_WORDS, LONG_IMDB_DESCRIPTION, IS_VERIFY, MAX_B_TN, TUTORIAL, TUTORIAL_2, TUTORIAL_3, LOG_CHANNEL, TMDB_ON_SEARCH
-from imdbkit import IMDBKit 
+from imdbkit import IMDBKit # pyrefly: ignore 
 import asyncio
 from pyrogram.types import Message, InlineKeyboardButton
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired
@@ -545,6 +545,15 @@ async def save_group_settings(group_id, key, value):
     temp.SETTINGS[group_id] = current
     await db.update_settings(group_id, current)
 
+async def delete_group_setting(group_id, key):
+    group_id = int(group_id)
+    current = await get_settings(group_id)
+    current = current.copy()
+    if key in current:
+        current.pop(key)
+        temp.SETTINGS[group_id] = current
+        await db.update_settings(group_id, current)
+
 def clean_filename(file_name):
     prefixes = ('[', '@', 'www.')
     unwanted = {word.lower() for word in BAD_WORDS}
@@ -610,6 +619,28 @@ def generate_settings_text(settings, title, reset_done=False):
 {note}
 """
 
+async def get_settings_text(grp_id, title):
+    settings = await get_settings(grp_id)
+    verify_status = settings.get('is_verify', IS_VERIFY)
+    verify_text = "ᴏɴ" if verify_status else "ᴏꜰꜰ"
+    log_channel = settings.get('log')
+    log_text = f"<code>{log_channel}</code>" if log_channel else "ɴᴏᴛ ꜱᴇᴛ"
+    fsub_ids = settings.get('fsub')
+    if fsub_ids:
+        if isinstance(fsub_ids, list):
+            fsub_text = ", ".join([f"<code>{id}</code>" for id in fsub_ids])
+        else:
+            fsub_text = f"<code>{fsub_ids}</code>"
+    else:
+        fsub_text = "ɴᴏᴛ ꜱᴇᴛ"
+    text = (
+        f"<b>ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ꜱᴇᴛᴛɪɴɢꜱ ꜰᴏʀ {title} ᴀꜱ ʏᴏᴜ ᴡɪꜱʜ ⚙\n\n"
+        f"✅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ : {verify_text}\n"
+        f"📝 ʟᴏɢ ᴄʜᴀɴɴᴇʟ : {log_text}\n"
+        f"🚫 ꜰꜱᴜʙ ᴄʜᴀɴɴᴇʟ : {fsub_text}</b>"
+    )
+    return text
+
 async def group_setting_buttons(grp_id):
     settings = await get_settings(grp_id)
     buttons = [[
@@ -636,11 +667,17 @@ async def group_setting_buttons(grp_id):
             ],[
                 InlineKeyboardButton('Vᴇʀɪғʏ', callback_data=f'setgs#is_verify#{settings.get("is_verify", IS_VERIFY)}#{grp_id}'),
                 InlineKeyboardButton('✔ Oɴ' if settings.get("is_verify", IS_VERIFY) else '✘ Oғғ', callback_data=f'setgs#is_verify#{settings.get("is_verify", IS_VERIFY)}#{grp_id}'),
-            ],
-            [
-                InlineKeyboardButton("❌ Remove ❌ ", callback_data=f"removegrp#{grp_id}")
-            ],
-            [
+            ],[
+                InlineKeyboardButton('ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ', callback_data=f'verification_setgs#{grp_id}'),
+                InlineKeyboardButton('ʟᴏɢ ᴄʜᴀɴɴᴇʟ', callback_data=f'log_setgs#{grp_id}'),
+            ],[
+                InlineKeyboardButton('ꜱᴇᴛ ᴄᴀᴘᴛɪᴏɴ', callback_data=f'caption_setgs#{grp_id}'),
+                InlineKeyboardButton('ᴄᴜꜱᴛᴏᴍ ꜰꜱᴜʙ', callback_data=f'fsub_setgs#{grp_id}'),
+            ],[
+                InlineKeyboardButton("Dᴇʟᴇᴛᴇ Gʀᴏᴜᴘ", callback_data=f"delete_group_check#{grp_id}")
+            ],[
+                InlineKeyboardButton("Rᴇᴍᴏᴠᴇ Gʀᴏᴜᴘ Cᴏɴɴᴇᴄᴛɪᴏɴ", callback_data=f"removegrp#{grp_id}")
+            ],[
                 InlineKeyboardButton('⇋ ᴄʟᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ ⇋', callback_data='close_data')
     ]]
     return buttons

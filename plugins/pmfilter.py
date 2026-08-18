@@ -1421,8 +1421,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     InlineKeyboardButton(
                         text=Chat.title, callback_data=f"grp_pm#{Chat.id}")
                 ])
-            except Exception as e:
-                logger.error("Error In PM Settings Button: %s", e)
+            except Exception:
                 pass
         await query.edit_message_text(
             "⚠️ ꜱᴇʟᴇᴄᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ᴡʜᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʜᴀɴɢᴇ.\n\n"

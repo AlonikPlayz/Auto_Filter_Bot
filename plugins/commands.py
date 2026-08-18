@@ -663,8 +663,7 @@ async def settings(client, message):
             try:
                 Chat = await client.get_chat(group)
                 group_list.append([ InlineKeyboardButton(text=Chat.title, callback_data=f"grp_pm#{Chat.id}") ])
-            except Exception as e:
-                logger.error("Error In PM Settings Button: %s", e)
+            except Exception:
                 pass
         await message.reply_text(
                     "⚠️ ꜱᴇʟᴇᴄᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ᴡʜᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʜᴀɴɢᴇ.\n\n"

@@ -208,8 +208,10 @@ async def premium_button(client, callback_query: CallbackQuery):
         amount = int(callback_query.data.split("_")[1])
         if amount in STAR_PREMIUM_PLANS:
             try:
-                buttons = [[	
-                    InlineKeyboardButton("ᴄᴀɴᴄᴇʟ 🚫", callback_data="close_data"),		    				
+                buttons = [[
+                    InlineKeyboardButton("Pay with Stars ??", pay=True)
+                ], [
+                    InlineKeyboardButton("? Close ?", callback_data="close_data")
                 ]]
                 reply_markup = InlineKeyboardMarkup(buttons)
                 await client.send_invoice(

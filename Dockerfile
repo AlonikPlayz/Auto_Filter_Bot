@@ -1,14 +1,5 @@
 FROM python:3.12-slim
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        mediainfo \
-        libmediainfo0v5 \
-        ca-certificates && \
-    ldconfig && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 WORKDIR /DreamxBotz
 
 COPY requirements.txt .

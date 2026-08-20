@@ -3,18 +3,18 @@ import os
 import logging
 import random
 import string
-from info import *
-from imdbkit import IMDBKit 
+from info import ULTRA_FAST_MODE, MAX_LIST_ELM, BAD_WORDS, LONG_IMDB_DESCRIPTION, IS_VERIFY, MAX_B_TN, TUTORIAL, TUTORIAL_2, TUTORIAL_3, LOG_CHANNEL, TMDB_ON_SEARCH
+from imdbkit import IMDBKit # pyrefly: ignore 
 import asyncio
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired, MessageNotModified
+from pyrogram.types import Message, InlineKeyboardButton
+from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired
 from pyrogram import enums
 from typing import Union
 from Script import script
 from typing import List
 from database.users_chats_db import db
 from bs4 import BeautifulSoup
-import requests
+import aiohttp
 from shortzy import Shortzy
 
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
@@ -134,7 +134,7 @@ async def is_check_admin(bot, chat_id, user_id):
     try:
         member = await bot.get_chat_member(chat_id, user_id)
         return member.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
-    except:
+    except Exception:
         return False
     
 async def users_broadcast(user_id, message, is_pin):
@@ -158,7 +158,7 @@ async def users_broadcast(user_id, message, is_pin):
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - PeerIdInvalid")
         return False, "Error"
-    except Exception as e:
+    except Exception:
         return False, "Error"
 
 async def groups_broadcast(chat_id, message, is_pin):
@@ -167,13 +167,13 @@ async def groups_broadcast(chat_id, message, is_pin):
         if is_pin:
             try:
                 await m.pin()
-            except:
+            except Exception:
                 pass
         return "Success"
     except FloodWait as e:
         await asyncio.sleep(e.x)
         return await groups_broadcast(chat_id, message)
-    except Exception as e:
+    except Exception:
         await db.delete_chat(chat_id)
         return "Error"
 
@@ -210,7 +210,7 @@ async def clear_junk(user_id, message):
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - PeerIdInvalid")
         return False, "Error"
-    except Exception as e:
+    except Exception:
         return False, "Error"
      
 async def get_status(bot_id):
@@ -500,14 +500,18 @@ async def search_gagala(text):
     usr_agent = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
         'Chrome/61.0.3163.100 Safari/537.36'
-        }
-    text = text.replace(" ", '+')
-    url = f'https://www.google.com/search?q={text}'
-    response = requests.get(url, headers=usr_agent)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'html.parser')
-    titles = soup.find_all( 'h3' )
-    return [title.getText() for title in titles]
+    }
+    text = text.replace(" ", "+")
+    url = f"https://www.google.com/search?q={text}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=usr_agent, timeout=30) as response:
+            response.raise_for_status()
+            html = await response.text()
+
+    soup = await asyncio.to_thread(BeautifulSoup, html, 'html.parser')
+    titles = soup.find_all('h3')
+    return [title.get_text() for title in titles if title.get_text().strip()]
 
 async def get_shortlink(link, grp_id, is_second_shortener=False, is_third_shortener=False):
     settings = await get_settings(grp_id)
@@ -521,22 +525,34 @@ async def get_shortlink(link, grp_id, is_second_shortener=False, is_third_shorte
     shortzy = Shortzy(api, site)
     try:
         link = await shortzy.convert(link)
-    except Exception as e:
+    except Exception:
         link = await shortzy.get_quick_link(link)
     return link
 
 async def get_settings(group_id):
+    group_id = int(group_id)
     settings = temp.SETTINGS.get(group_id)
     if not settings:
         settings = await db.get_settings(group_id)
-        temp.SETTINGS.update({group_id: settings})
+        temp.SETTINGS[group_id] = settings.copy()
     return settings
     
 async def save_group_settings(group_id, key, value):
+    group_id = int(group_id)
     current = await get_settings(group_id)
+    current = current.copy()
     current.update({key: value})
-    temp.SETTINGS.update({group_id: current})
+    temp.SETTINGS[group_id] = current
     await db.update_settings(group_id, current)
+
+async def delete_group_setting(group_id, key):
+    group_id = int(group_id)
+    current = await get_settings(group_id)
+    current = current.copy()
+    if key in current:
+        current.pop(key)
+        temp.SETTINGS[group_id] = current
+        await db.update_settings(group_id, current)
 
 def clean_filename(file_name):
     prefixes = ('[', '@', 'www.')
@@ -557,9 +573,9 @@ def get_size(size):
         size /= 1024.0
     return "%.2f %s" % (size, units[i])
 
-def split_list(l, n):
-    for i in range(0, len(l), n):
-        yield l[i:i + n]  
+def split_list(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]  
 
 def extract_request_content(message_text):
     match = re.search(r"<u>(.*?)</u>", message_text)
@@ -603,6 +619,28 @@ def generate_settings_text(settings, title, reset_done=False):
 {note}
 """
 
+async def get_settings_text(grp_id, title):
+    settings = await get_settings(grp_id)
+    verify_status = settings.get('is_verify', IS_VERIFY)
+    verify_text = "ᴏɴ" if verify_status else "ᴏꜰꜰ"
+    log_channel = settings.get('log')
+    log_text = f"<code>{log_channel}</code>" if log_channel else "ɴᴏᴛ ꜱᴇᴛ"
+    fsub_ids = settings.get('fsub')
+    if fsub_ids:
+        if isinstance(fsub_ids, list):
+            fsub_text = ", ".join([f"<code>{id}</code>" for id in fsub_ids])
+        else:
+            fsub_text = f"<code>{fsub_ids}</code>"
+    else:
+        fsub_text = "ɴᴏᴛ ꜱᴇᴛ"
+    text = (
+        f"<b>ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ꜱᴇᴛᴛɪɴɢꜱ ꜰᴏʀ {title} ᴀꜱ ʏᴏᴜ ᴡɪꜱʜ ⚙\n\n"
+        f"✅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ : {verify_text}\n"
+        f"📝 ʟᴏɢ ᴄʜᴀɴɴᴇʟ : {log_text}\n"
+        f"🚫 ꜰꜱᴜʙ ᴄʜᴀɴɴᴇʟ : {fsub_text}</b>"
+    )
+    return text
+
 async def group_setting_buttons(grp_id):
     settings = await get_settings(grp_id)
     buttons = [[
@@ -629,12 +667,18 @@ async def group_setting_buttons(grp_id):
             ],[
                 InlineKeyboardButton('Vᴇʀɪғʏ', callback_data=f'setgs#is_verify#{settings.get("is_verify", IS_VERIFY)}#{grp_id}'),
                 InlineKeyboardButton('✔ Oɴ' if settings.get("is_verify", IS_VERIFY) else '✘ Oғғ', callback_data=f'setgs#is_verify#{settings.get("is_verify", IS_VERIFY)}#{grp_id}'),
-            ],
-            [
-                InlineKeyboardButton("❌ Remove ❌ ", callback_data=f"removegrp#{grp_id}")
-            ],
-            [
-                InlineKeyboardButton('⇋ ᴄʟᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ ⇋', callback_data='close_data')
+            ],[
+                InlineKeyboardButton('ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ', callback_data=f'verification_setgs#{grp_id}'),
+                InlineKeyboardButton('ʟᴏɢ ᴄʜᴀɴɴᴇʟ', callback_data=f'log_setgs#{grp_id}'),
+            ],[
+                InlineKeyboardButton('ꜱᴇᴛ ᴄᴀᴘᴛɪᴏɴ', callback_data=f'caption_setgs#{grp_id}'),
+                InlineKeyboardButton('ᴄᴜꜱᴛᴏᴍ ꜰꜱᴜʙ', callback_data=f'fsub_setgs#{grp_id}'),
+            ],[
+                InlineKeyboardButton("Dᴇʟᴇᴛᴇ Gʀᴏᴜᴘ", callback_data=f"delete_group_check#{grp_id}", style=enums.ButtonStyle.DANGER)
+            ],[
+                InlineKeyboardButton("Rᴇᴍᴏᴠᴇ Gʀᴏᴜᴘ Cᴏɴɴᴇᴄᴛɪᴏɴ", callback_data=f"removegrp#{grp_id}", style=enums.ButtonStyle.DANGER)
+            ],[
+                InlineKeyboardButton('⇋ ᴄʟᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ ⇋', callback_data='close_data', style=enums.ButtonStyle.DANGER)
     ]]
     return buttons
 
@@ -781,7 +825,7 @@ def gfilterparser(text, keyword):
 
     try:
         return note_data, buttons, alerts
-    except:
+    except Exception:
         return note_data, buttons, None
 
 def parser(text, keyword):
@@ -833,7 +877,7 @@ def parser(text, keyword):
 
     try:
         return note_data, buttons, alerts
-    except:
+    except Exception:
         return note_data, buttons, None
 
 def remove_escapes(text: str) -> str:
@@ -856,7 +900,7 @@ async def log_error(client, error_message):
             text=f"<b>⚠️ Error Log:</b>\n<code>{error_message}</code>"
         )
     except Exception as e:
-        print(f"Failed to log error: {e}")
+        logger.error("Failed to log error: %s", e)
 
 
 def get_time(seconds):
@@ -1059,7 +1103,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                 )
 
             cap += "\n\n<u>Your Requested Files Are Here</u>\n\n</b>"
-            for idx, file in enumerate(files, start=offset):
+            for idx, file in enumerate(files, start=offset + 1):
                         cap += (
                             f"<b>{idx}. "
                             f"<a href='https://telegram.me/{temp.U_NAME}"

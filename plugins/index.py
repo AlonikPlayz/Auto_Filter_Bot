@@ -3,7 +3,6 @@ import time
 import re
 import asyncio
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, ChatAdminRequired, UsernameInvalid, UsernameNotModified
 from info import ADMINS, INDEX_REQ_CHANNEL as LOG_CHANNEL
 from database.ia_filterdb import save_file
@@ -46,7 +45,7 @@ async def index_files(bot, query):
     )
     try:
         chat = int(chat)
-    except:
+    except Exception:
         chat = chat
     await index_files_to_db(int(lst_msg_id), chat, msg, bot)
 
@@ -78,7 +77,7 @@ async def send_for_index(bot, message):
         return await message.reply(f'Errors - {e}')
     try:
         k = await bot.get_messages(chat_id, last_msg_id)
-    except:
+    except Exception:
         return await message.reply('Make Sure That Iam An Admin In The Channel, if channel is private')
     if k.empty:
         return await message.reply('This may be group and i am not a admin of the group.')
@@ -86,7 +85,7 @@ async def send_for_index(bot, message):
     if message.from_user.id in ADMINS:
         buttons = [
             [InlineKeyboardButton('Yes', callback_data=f'index#accept#{chat_id}#{last_msg_id}#{message.from_user.id}')],
-            [InlineKeyboardButton('Close', callback_data='close_data')]
+            [InlineKeyboardButton('Close', callback_data='close_data', style=enums.ButtonStyle.DANGER)]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         return await message.reply(
@@ -117,7 +116,7 @@ async def set_skip_number(bot, message):
         _, skip = message.text.split(" ")
         try:
             skip = int(skip)
-        except:
+        except Exception:
             return await message.reply("Skip number should be an integer.")
         await message.reply(f"Successfully set SKIP number as {skip}")
         temp.CURRENT = int(skip)
@@ -149,7 +148,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             if total_messages <= 0:
                 await msg.edit(
                     "🚫 No Messages To Index.",
-                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data')]])
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data', style=enums.ButtonStyle.DANGER)]])
                 )
                 return
             batches = ceil(total_messages / BATCH_SIZE)
@@ -172,7 +171,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     messages = await bot.get_messages(chat, list(message_ids))
                     if not isinstance(messages, list):
                         messages = [messages]
-                except Exception as e:
+                except Exception:
                     errors += len(message_ids)
                     current += len(message_ids)
                     continue
@@ -247,11 +246,11 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 f"Non-Media: <code>{no_media + unsupported}</code> (Unsupported: <code>{unsupported}</code>)\n"
                 f"Errors: <code>{errors}</code>\n"
                 f"⏱️ Elapsed: <code>{get_readable_time(elapsed)}</code>",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data')]])
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data', style=enums.ButtonStyle.DANGER)]])
             )
         except Exception as e:
             await msg.edit(
                 f"❌ Error: <code>{e}</code>",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data')]])
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Close', callback_data='close_data', style=enums.ButtonStyle.DANGER)]])
             )
 

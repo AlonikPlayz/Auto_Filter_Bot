@@ -10,7 +10,7 @@ from pyrogram import StopTransmission, enums, raw, types, utils
 from pyrogram.errors import FilePartMissing
 from pyrogram.file_id import FileType
 
-from pyrogram import enums, types, Client
+from pyrogram import Client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,18 +55,22 @@ async def custom_send_cached_media(
         vidcover_media = None
         peer = await self.resolve_peer(chat_id)
         
-        reply_to = await utils.get_reply_to(
-            client=self,
-            chat_id=chat_id,
-            reply_to_message_id=reply_to_message_id,
-            reply_to_story_id=reply_to_story_id,
-            message_thread_id=message_thread_id,
-            reply_to_chat_id=reply_to_chat_id,
-            reply_to_monoforum_id=reply_to_monoforum_id,
-            quote_text=quote_text,
-            quote_entities=quote_entities,
-            parse_mode=parse_mode
-        )
+        reply_to = None
+        if reply_to_message_id or reply_to_story_id:
+            reply_parameters = types.ReplyParameters(
+                message_id=reply_to_message_id,
+                story_id=reply_to_story_id,
+                chat_id=reply_to_chat_id,
+                quote=quote_text,
+                quote_parse_mode=parse_mode,
+                quote_entities=quote_entities
+            )
+            reply_to = await utils.get_reply_to(
+                client=self,
+                reply_parameters=reply_parameters,
+                message_thread_id=message_thread_id,
+                direct_messages_topic_id=reply_to_monoforum_id
+            )
         
         try:
             if cover is not None:
@@ -107,14 +111,14 @@ async def custom_send_cached_media(
                         access_hash=vidcover_media.photo.access_hash,
                         file_reference=vidcover_media.photo.file_reference
                     )
-        except Exception as e:
+        except Exception:
             pass
 
         media = utils.get_input_media_from_file_id(file_id)
         if vidcover_file is not None:
             try:
                 media.video_cover = vidcover_file
-            except Exception as e:
+            except Exception:
                 pass
         media.spoiler = has_spoiler
 
@@ -192,18 +196,22 @@ async def custom_send_video(
         vidcover_media = None
         peer = await self.resolve_peer(chat_id)
 
-        reply_to = await utils.get_reply_to(
-            client=self,
-            chat_id=chat_id,
-            reply_to_message_id=reply_to_message_id,
-            reply_to_story_id=reply_to_story_id,
-            message_thread_id=message_thread_id,
-            reply_to_chat_id=reply_to_chat_id,
-            reply_to_monoforum_id=reply_to_monoforum_id,
-            quote_text=quote_text,
-            quote_entities=quote_entities,
-            parse_mode=parse_mode
-        )
+        reply_to = None
+        if reply_to_message_id or reply_to_story_id:
+            reply_parameters = types.ReplyParameters(
+                message_id=reply_to_message_id,
+                story_id=reply_to_story_id,
+                chat_id=reply_to_chat_id,
+                quote=quote_text,
+                quote_parse_mode=parse_mode,
+                quote_entities=quote_entities
+            )
+            reply_to = await utils.get_reply_to(
+                client=self,
+                reply_parameters=reply_parameters,
+                message_thread_id=message_thread_id,
+                direct_messages_topic_id=reply_to_monoforum_id
+            )
         try:
             if cover is not None:
                 if isinstance(cover, str):
@@ -279,7 +287,7 @@ async def custom_send_video(
                     if vidcover_file is not None:
                         try:
                             media.video_cover = vidcover_file
-                        except Exception as e:
+                        except Exception:
                             pass
                     media.spoiler = has_spoiler
             else:
@@ -589,7 +597,7 @@ async def custom_copy_message(
         parse_mode=parse_mode,
         caption_entities=caption_entities,
         has_spoiler=has_spoiler,
-        video_cover=video_cover,
+        video_cover=video_cover, #ignore
         disable_notification=disable_notification,
         message_thread_id=message_thread_id,
         reply_to_message_id=reply_to_message_id,

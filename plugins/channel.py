@@ -360,7 +360,6 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
 
 async def send_movie_update(bot, base_name):
     max_retries = 3
-    base_delay = 5
     for attempt in range(max_retries):
         try:
             movie_doc = await db.movie_updates.find_one({"_id": base_name})
@@ -377,14 +376,24 @@ async def send_movie_update(bot, base_name):
             size=(2560, 1440) if LANDSCAPE_POSTER and TMDB_POSTER and movie_doc.get("is_backdrop") and not movie_doc.get("error_tmdb") else (853, 1280)
             if movie_doc.get("poster_url") and not LINK_PREVIEW:
                 resized_poster = await fetch_image(movie_doc["poster_url"], size)
-                msg = await bot.send_photo(
-                    chat_id=MOVIE_UPDATE_CHANNEL,
-                    photo=resized_poster,
-                    caption=text,
-                    reply_markup=buttons,
-                    parse_mode=enums.ParseMode.HTML
-                )
-                is_photo = True
+                if resized_poster:
+                    msg = await bot.send_photo(
+                        chat_id=MOVIE_UPDATE_CHANNEL,
+                        photo=resized_poster,
+                        caption=text,
+                        reply_markup=buttons,
+                        parse_mode=enums.ParseMode.HTML
+                    )
+                    is_photo = True
+                else:
+                    send_params = {
+                        "chat_id": MOVIE_UPDATE_CHANNEL,
+                        "text": text,
+                        "reply_markup": buttons,
+                        "parse_mode": enums.ParseMode.HTML
+                    }
+                    msg = await bot.send_message(**send_params)
+                    is_photo = False
             else:
                 send_params = {
                     "chat_id": MOVIE_UPDATE_CHANNEL,
@@ -482,7 +491,7 @@ def generate_movie_message(movie_doc, base_name):
         if file["quality"] != "N/A":
             all_qualities.update(q.strip() for q in file["quality"].split(",") if q.strip())
         if file["language"] != "N/A":
-            all_languages.update(l.strip() for l in file["language"].split(",") if l.strip())
+            all_languages.update(lang.strip() for lang in file["language"].split(",") if lang.strip())
         if file["ott_platform"] != "N/A":
             platforms = [p.strip() for p in file["ott_platform"].split("|") if p.strip()]
             all_ott_platforms.update(platforms)

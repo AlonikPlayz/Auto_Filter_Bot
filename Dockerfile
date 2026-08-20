@@ -1,8 +1,7 @@
 FROM python:3.12.2-slim
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends git mediainfo libmediainfo0v5 libmediainfo-dev ca-certificates && \
-    ldconfig && \
+    apt-get install -y --no-install-recommends git mediainfo libmediainfo0v5 libmediainfo-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

@@ -2,6 +2,10 @@
 .git
 .gitignore
 
+# System / Etc files (Whiteout error prevent karne ke liye)
+/etc/*
+etc/*
+
 # Python
 __pycache__/
 *.py[cod]
@@ -30,7 +34,6 @@ DreamXlogs.txt
 
 # Docker
 docker-compose.yml
-Dockerfile
 
 # Misc
 .agents/

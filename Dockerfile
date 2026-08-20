@@ -4,8 +4,7 @@ WORKDIR /DreamxBotz
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade pip --root-user-action=ignore && \
-    pip install --no-cache-dir -r requirements.txt --root-user-action=ignore
+RUN pip install --no-cache-dir -r requirements.txt --root-user-action=ignore
 
 COPY . .
 

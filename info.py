@@ -126,7 +126,7 @@ THREE_VERIFY_GAP = int(environ.get('THREE_VERIFY_GAP', "1200"))
 # Channel & Group Links Configuration
 # ============================
 GRP_LNK = environ.get('GRP_LNK', 'https://t.me/RajatFilesGroup') # Group link for the bot
-OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/alonik1') # Owner link for the bot
+OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/Rajat_Support_Bot') # Owner link for the bot
 UPDATE_CHNL_LNK = environ.get('UPDATE_CHNL_LNK', 'https://t.me/rajat_files_update') # Update channel link for the bot
 
 # ============================
@@ -139,7 +139,7 @@ PREMIUM_USER = [int(user) if id_pattern.search(user) else user for user in envir
 # ============================
 # Miscellaneous Configuration
 # ============================
-ULTRA_FAST_MODE = is_enabled(environ.get('ULTRA_FAST_MODE', "False"), True) # Set to True for fast search, False for original search
+ULTRA_FAST_MODE = is_enabled(environ.get('ULTRA_FAST_MODE', "True"), True) # Set to True for fast search, False for original search
 
 MAX_B_TN = environ.get("MAX_B_TN", "8") # Maximum number of buttons in a row (default: 5)
 PORT = int(environ.get("PORT", "8080"))  # Port for the web server (default: 8080)
@@ -233,7 +233,7 @@ MULTI_CLIENT = False
 name = str(environ.get('name', 'DREAMXBOTZ'))
 PING_INTERVAL = int(environ.get("PING_INTERVAL", "298"))  # 5 minutes
 # ============================
-REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🎅", "😐", "🥰", "🤩", "😱", "🤣", "😘", "👏", "😛", "😈", "🎉", "⚡️", "🫡", "🤓", "😎", "🏆", "🔥", "🤭", "🌚", "🆒", "👻", "😁"]
+REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🎅", "🥰", "🤩", "😱", "👏", "😛", "😈", "🎉", "⚡️", "🫡", "🤓", "😎", "🏆", "🔥", "🤭", "🌚", "🆒", "👻", "😁"]
 
 # ============================
 # Commands Bot

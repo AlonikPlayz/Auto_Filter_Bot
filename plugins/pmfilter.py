@@ -12,13 +12,14 @@ from info import (
     ADMINS, AUTH_CHANNELS, AUTH_REQ_CHANNELS, BIN_CHANNEL, DELETE_TIME,
     EMOJI_MODE, GRP_LNK, LANDSCAPE_POSTER, LANGUAGES, LOG_CHANNEL, MAX_B_TN, MSG_ALRT,
     MULTIPLE_DB, NO_RESULTS_MSG, OWNER_LNK, OWNER_UPI_ID, PICS, PICS_URL, QR_CODE, QUALITIES,
-    REACTIONS, REQST_CHANNEL, SEASONS, STAR_PREMIUM_PLANS, SUBSCRIPTION, SUPPORT_CHAT_ID,
+    REACTIONS, REQST_CHANNEL, SEASONS, STAR_PREMIUM_PLANS, SUBSCRIPTION, SUPPORT_CHAT, SUPPORT_CHAT_ID,
     TMDB_ON_SEARCH, TMDB_POSTER, ULTRA_FAST_MODE, UPDATE_CHNL_LNK, URL
 )
 from Script import script
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from database.refer import referdb
 from database.users_chats_db import db
+import uuid
 import asyncio
 import re
 import math
@@ -40,7 +41,19 @@ BUTTONS0 = {}
 BUTTONS1 = {}
 BUTTONS2 = {}
 SPELL_CHECK = {}
+PENDING_NOTIFY = {}
 
+SEASON_EPISODE_PATTERN = re.compile(
+    r'\bs(?:eason)?\s*0*(\d{1,3})\s*[-–—.,]?\s*(?:episode|epi|eps?|ep|e)\s*[-–—.,]?\s*0*(\d{1,4})\b',
+    re.IGNORECASE
+)
+
+def normalize_season_episode(text):
+    def repl(match):
+        season = int(match.group(1))
+        episode = int(match.group(2))
+        return f"s{season:02d}e{episode:02d}"
+    return SEASON_EPISODE_PATTERN.sub(repl, text)
 
 @Client.on_message(filters.group & filters.text & filters.incoming & ~filters.regex(r"^/") )
 async def give_filter(client, message):
@@ -373,14 +386,59 @@ async def advantage_spoll_choker(bot, query):
         reqstr = await bot.get_users(reqstr1)
         if NO_RESULTS_MSG:
             try:
-                await bot.send_message(chat_id=BIN_CHANNEL, text=script.NORSLTS.format(reqstr.id, reqstr.mention, movie))
+                notify_key = str(uuid.uuid4())[:8]
+                PENDING_NOTIFY[notify_key] = (reqstr.id, movie)
+                bin_btn = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("✅ Notify User: Added", callback_data=f"notifyadded#{notify_key}")]]
+                )
+                await bot.send_message(
+                    chat_id=BIN_CHANNEL,
+                    text=script.NORSLTS.format(reqstr.id, reqstr.mention, movie),
+                    reply_markup=bin_btn
+                )
             except Exception as e:
                 logger.error("Error In Spol: %s — Make Sure Bot Admin BIN CHANNEL", e)
         btn = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("🔰Cʟɪᴄᴋ ʜᴇʀᴇ & ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ🔰", url=OWNER_LNK)]])
+            [[InlineKeyboardButton("🔰Cʟɪᴄᴋ ʜᴇʀᴇ & ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ🔰", url=SUPPORT_CHAT)]])
         k = await query.message.edit(script.MVE_NT_FND, reply_markup=btn)
-        await asyncio.sleep(10)
+        await asyncio.sleep(60)
         await k.delete()
+
+@Client.on_callback_query(filters.regex(r"^notifyadded#"))
+async def notify_user_file_added(bot, query):
+    if query.from_user.id not in ADMINS:
+        return await query.answer("You don't have sufficient rights to do this!", show_alert=True)
+
+    _, notify_key = query.data.split("#")
+    data = PENDING_NOTIFY.get(notify_key)
+    if not data:
+        return await query.answer("⚠️ This request has expired or was already handled.", show_alert=True)
+
+    user_id, movie = data
+    try:
+        await bot.send_message(
+            chat_id=int(user_id),
+            text=(
+                f"<b>🎉 Great news!</b>\n\n"
+                f"The title you were looking for — <u>{movie}</u> — has just landed in our database! 🍿\n\n"
+                f"Head back and search for it now. Enjoy! 🎬"
+            ),
+        )
+        await query.answer("✅ User notified!", show_alert=True)
+    except UserIsBlocked:
+        await query.answer("⚠️ User has blocked the bot — couldn't notify them.", show_alert=True)
+    except Exception as e:
+        logger.error(f"Failed to notify user {user_id}: {e}")
+        await query.answer("⚠️ Something went wrong notifying the user.", show_alert=True)
+        return
+
+    del PENDING_NOTIFY[notify_key]
+    try:
+        await query.message.edit_reply_markup(
+            InlineKeyboardMarkup([[InlineKeyboardButton("✅ Notified", callback_data="noop")]])
+        )
+    except Exception:
+        pass
 
 # Qualities
 @Client.on_callback_query(filters.regex(r"^qualities#"))
@@ -1510,10 +1568,8 @@ async def auto_filter(client, msg, spoll=False):
                 search = re.sub(r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)\b", "", search, flags=re.IGNORECASE)
                 search = search.replace("-", " ")
                 search = re.sub(r"[:']", "", search)
-                search = re.sub(r'\bseason\s+(\d+)\s+episode\s+(\d+)\b', lambda m: f"s{int(m.group(1)):02}e{int(m.group(2)):02}", search)
-                search = re.sub(r'\bseason\s+(\d+)\b', lambda m: f"s{int(m.group(1)):02}", search)
-                search = re.sub(r'\bepisode\s+(\d+)\b', lambda m: f"e{int(m.group(1)):02}", search)
                 search = re.sub(r"\s+", " ", search).strip()
+                search = normalize_season_episode(search)
                 files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
                 settings = await get_settings(message.chat.id)
                 if not files:

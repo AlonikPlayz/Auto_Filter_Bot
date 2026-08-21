@@ -721,24 +721,23 @@ async def save_template(client, message):
 
 
 # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
-@Client.on_message((filters.command("request") | filters.regex(r"(?i)#request")) & filters.group)
+@Client.on_message(filters.command("request") | filters.regex(r"(?i)#request"))
 async def requests(bot, message):
-    if message.chat.id != SUPPORT_CHAT_ID:
-        return
+    is_private = message.chat.id == message.from_user.id
     if not message.from_user:
         return await message.reply_text("<b>⚠️ ᴜɴᴀʙʟᴇ ᴛᴏ ɪᴅᴇɴᴛɪꜰʏ ʏᴏᴜ.</b>")
     
     reporter = str(message.from_user.id)
     mention = message.from_user.mention
 
-    if message.reply_to_message:
+    if message.reply_to_message and not is_private:
         target_msg = message.reply_to_message
         content = target_msg.text or target_msg.caption or ""
         msg_link = target_msg.link
     else:
         content = message.text or message.caption or ""
         content = re.sub(r"(?i)[#/]?request", "", content).strip()
-        msg_link = message.link
+        msg_link = message.link if not is_private else None
 
     content = content.strip()
     if len(content) < 3:
@@ -746,10 +745,11 @@ async def requests(bot, message):
     
     reported_post: Message | None = None
     try:
-        btn = [[
-            InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=msg_link),
-            InlineKeyboardButton('ꜱʜᴏᴡ ᴏᴘᴛɪᴏɴꜱ', callback_data=f'show_option#{reporter}')
-        ]]
+        btn_row = []
+        if msg_link:
+            btn_row.append(InlineKeyboardButton('VIEW REQUEST', url=msg_link))
+        btn_row.append(InlineKeyboardButton('SHOW OPTIONS', callback_data=f'show_option#{reporter}'))
+        btn = [btn_row]
         req_text = f"<b>📝 ʀᴇǫᴜᴇꜱᴛ : <u>{content}</u>\n\n📚 ʀᴇᴘᴏʀᴛᴇᴅ ʙʏ : {mention}\n📖 ʀᴇᴘᴏʀᴛᴇʀ ɪᴅ : {reporter}\n\n</b>"
         warning_text = "<b>⚠️ ʀᴇǫᴜᴇꜱᴛ ᴄʜᴀɴɴᴇʟ ɪꜱ ɴᴏᴛ ꜱᴇᴛ.</b>"
         if REQST_CHANNEL is not None:

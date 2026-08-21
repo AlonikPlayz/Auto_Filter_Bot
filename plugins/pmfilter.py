@@ -72,7 +72,11 @@ async def give_filter(client, message):
         search = message.text
         _, _, total_results = await get_search_results(chat_id=message.chat.id, query=search.lower(), offset=0, filter=True)
         if total_results == 0:
-            return
+            return await message.reply_text(
+                f"<b>❌ <u>{search}</u> ɪs ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ.</b>\n\n"
+                f"Uꜱᴇ <code>/request</code> ᴛᴏ ʀᴇǫᴜᴇꜱᴛ ɪᴛ.\n\n"
+                f"<b>Exᴀᴍᴘʟᴇ:</b> <code>/request {search}</code>"
+            )
         await message.reply_text(
             script.ALREADY_AVAILABLE_TXT.format(message.from_user.mention, total_results, search),
             reply_markup=InlineKeyboardMarkup(
@@ -1506,6 +1510,9 @@ async def auto_filter(client, msg, spoll=False):
                 search = re.sub(r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)\b", "", search, flags=re.IGNORECASE)
                 search = search.replace("-", " ")
                 search = re.sub(r"[:']", "", search)
+                search = re.sub(r'\bseason\s+(\d+)\s+episode\s+(\d+)\b', lambda m: f"s{int(m.group(1)):02}e{int(m.group(2)):02}", text)
+                search = re.sub(r'\bseason\s+(\d+)\b', lambda m: f"s{int(m.group(1)):02}", text)
+                search = re.sub(r'\bepisode\s+(\d+)\b', lambda m: f"e{int(m.group(1)):02}", text)
                 search = re.sub(r"\s+", " ", search).strip()
                 files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
                 settings = await get_settings(message.chat.id)

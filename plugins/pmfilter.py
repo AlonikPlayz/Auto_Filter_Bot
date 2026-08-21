@@ -1070,7 +1070,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         try:
             cfg = status_configs[key]
             try:
-                user = await client.get_users(from_user)
+                user = await client.get_users(int(from_user))
             except Exception as e:
                 logger.error(f"get_users failed for {from_user}: {e}")
                 return await query.answer("⚠️ Couldn't fetch user info. They may need to message the bot first.", show_alert=True)

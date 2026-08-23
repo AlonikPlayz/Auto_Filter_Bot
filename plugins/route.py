@@ -14,19 +14,6 @@ import info
 
 routes = web.RouteTableDef()
 
-mimetypes.add_type("video/mp4", ".mp4")
-mimetypes.add_type("video/x-matroska", ".mkv")
-mimetypes.add_type("video/webm", ".webm")
-mimetypes.add_type("video/x-msvideo", ".avi")
-mimetypes.add_type("video/quicktime", ".mov")
-
-
-def guess_mime_type(file_name: str, mime_type: str) -> str:
-    guessed_type = mimetypes.guess_type(file_name or "")[0]
-    if not mime_type or mime_type == "application/octet-stream":
-        return guessed_type or "application/octet-stream"
-    return mime_type
-
 @routes.get("/favicon.ico")
 async def favicon_route_handler(request):
     return web.FileResponse('dreamxbotz/template/favicon.ico')
@@ -52,7 +39,7 @@ async def watch_handler(request: web.Request):
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
     except (AttributeError, BadStatusLine, ConnectionResetError):
-        raise web.HTTPNotFound(text="Not found")
+        pass
     except Exception as e:
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
@@ -82,7 +69,7 @@ async def stream_handler(request: web.Request):
     except web.HTTPNotFound:
         raise  # Re-raise HTTPNotFound without logging
     except (AttributeError, BadStatusLine, ConnectionResetError):
-        raise web.HTTPNotFound(text="Not found")
+        pass
     except Exception as e:
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
@@ -90,7 +77,7 @@ async def stream_handler(request: web.Request):
 class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
-    range_header = request.headers.get("Range")
+    range_header = request.headers.get("Range", 0)
     
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
@@ -113,27 +100,15 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     
     file_size = file_id.file_size
 
-    try:
-        if range_header:
-            from_bytes, until_bytes = range_header.replace("bytes=", "").split("-", 1)
-            if from_bytes:
-                from_bytes = int(from_bytes)
-                until_bytes = int(until_bytes) if until_bytes else file_size - 1
-            else:
-                suffix_length = int(until_bytes)
-                from_bytes = max(file_size - suffix_length, 0)
-                until_bytes = file_size - 1
-        else:
-            from_bytes = request.http_range.start or 0
-            until_bytes = (request.http_range.stop or file_size) - 1
-    except ValueError:
-        return web.Response(
-            status=416,
-            body="416: Range not satisfiable",
-            headers={"Content-Range": f"bytes */{file_size}"},
-        )
+    if range_header:
+        from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
+        from_bytes = int(from_bytes)
+        until_bytes = int(until_bytes) if until_bytes else file_size - 1
+    else:
+        from_bytes = request.http_range.start or 0
+        until_bytes = (request.http_range.stop or file_size) - 1
 
-    if (until_bytes >= file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
+    if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
         return web.Response(
             status=416,
             body="416: Range not satisfiable",
@@ -148,9 +123,13 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     last_part_cut = until_bytes % chunk_size + 1
 
     req_length = until_bytes - from_bytes + 1
-    part_count = math.ceil((until_bytes + 1) / chunk_size) - math.floor(offset / chunk_size)
-    mime_type = guess_mime_type(file_id.file_name, file_id.mime_type)
-    file_name = file_id.file_name or f"{secrets.token_hex(2)}.unknown"
+    part_count = math.ceil(until_bytes / chunk_size) - math.floor(offset / chunk_size)
+    body = tg_connect.yield_file(
+        file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
+    )
+
+    mime_type = file_id.mime_type
+    file_name = file_id.file_name
 
     if mime_type:
         if not file_name:
@@ -160,21 +139,19 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
                 file_name = f"{secrets.token_hex(2)}.unknown"
     else:
         if file_name:
-            mime_type = mimetypes.guess_type(file_id.file_name)[0] or "application/octet-stream"
+            mime_type = mimetypes.guess_type(file_id.file_name)
         else:
             mime_type = "application/octet-stream"
             file_name = f"{secrets.token_hex(2)}.unknown"
 
-    response = web.StreamResponse(
+    return web.Response(
         status=206 if range_header else 200,
+        body=body,
         headers={
             "Content-Type": f"{mime_type}",
+            "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
             "Content-Length": str(req_length),
-            "Content-Disposition": (
-                f'attachment; filename="{file_name}"'
-                if request.rel_url.query.get("download") == "1"
-                else f'inline; filename="{file_name}"'
-            ),
+            "Content-Disposition": f'inline; filename="{file_name}"',  # inline for streaming
             "Accept-Ranges": "bytes",
             # CORS headers for JSMKV
             "Access-Control-Allow-Origin": "*",
@@ -183,14 +160,3 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges",
         },
     )
-    if range_header:
-        response.headers["Content-Range"] = f"bytes {from_bytes}-{until_bytes}/{file_size}"
-
-    await response.prepare(request)
-    if request.method != "HEAD":
-        async for chunk in tg_connect.yield_file(
-            file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
-        ):
-            await response.write(chunk)
-    await response.write_eof()
-    return response

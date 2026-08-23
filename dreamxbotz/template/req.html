@@ -947,7 +947,7 @@
                 <div class="video-container">
                     <video id="player" class="mkv-player" playsinline controls
                         data-poster="https://i.ibb.co/MxYbt8M1/x.jpg">
-                        <source src="{{file_url}}" type="{{mime_type}}" />
+                        <source src="{{file_url}}" />
                     </video>
                 </div>
             </div>
@@ -1535,12 +1535,9 @@
 
         function blazeDownload() {
             const a = document.createElement("a");
-            a.href = "{{download_url}}";
+            a.href = "{{file_url}}";
             a.download = "{{file_name}}";
-            a.rel = "noopener";
-            document.body.appendChild(a);
             a.click();
-            a.remove();
         }
 
         function vlc_player(event) {
@@ -1553,20 +1550,18 @@
             // 2️⃣ Fallback to Android Intent (works everywhere)
             setTimeout(() => {
                 window.location.href =
-                    `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end`;
+                    "intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end";
             }, 500);
         }
 
         function mx_player() {
-            const url = "{{file_url}}";
             window.location.href =
-                `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;end`;
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;end";
         }
 
         function mx_playerpro() {
-            const url = "{{file_url}}";
             window.location.href =
-                `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;end`;
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;end";
         }
 
         function playit_player() {
@@ -1576,22 +1571,19 @@
         }
 
         function km_player() {
-            const url = "{{file_url}}";
             window.location.href =
-                `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.kmplayer;end`;
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.kmplayer;end";
         }
 
         function s_player() {
-            const url = "{{file_url}}";
             window.location.href =
-                `intent:${url}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`;
+                "intent:{{file_url}}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end";
         }
 
         function hd_player() {
-            const url = "{{file_url}}";
             // Correct HD Player package
             window.location.href =
-                `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=uplayer.video.player;end`;
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=uplayer.video.player;end";
         }
 
         document.addEventListener("click", (e) => {

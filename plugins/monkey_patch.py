@@ -420,8 +420,9 @@ async def custom_copy(
             has_spoiler=has_spoiler,
             protect_content=protect_content,
             allow_paid_broadcast=allow_paid_broadcast,
-            invert_media=invert_media,
-            reply_markup=self.reply_markup if reply_markup is object else reply_markup
+            invert_media=invert_media,  # type: ignore
+            reply_markup=self.reply_markup if reply_markup is object else reply_markup,
+            cover=video_cover  # type: ignore
         )
 
         if self.photo:
@@ -437,8 +438,8 @@ async def custom_copy(
                 caption=caption,
                 parse_mode=parse_mode,
                 caption_entities=caption_entities,
-                invert_media=invert_media or self.invert_media,
-                cover=video_cover,
+                invert_media=invert_media or self.invert_media,  # type: ignore
+                cover=video_cover,  # type: ignore
                 has_spoiler=self.has_media_spoiler,
                 disable_notification=disable_notification,
                 protect_content=self.has_protected_content if protect_content is None else protect_content,
@@ -497,9 +498,8 @@ async def custom_copy(
                 chat_id,
                 question=self.poll.question,
                 options=[
-                    types.PollOption(
-                        text=opt.text,
-                        entities=opt.entities
+                    types.InputPollOption(
+                        text=opt.text
                     ) for opt in self.poll.options
                 ],
                 disable_notification=disable_notification,
@@ -522,8 +522,8 @@ async def custom_copy(
                 text=self.text,
                 entities=self.entities,
                 parse_mode=enums.ParseMode.DISABLED,
-                large_media=self.web_page_preview.force_large_media,
-                invert_media=self.web_page_preview.invert_media,
+                invert_media=self.web_page_preview.invert_media, # type: ignore
+                prefer_large_media=self.web_page_preview.force_large_media, # type: ignore
                 disable_notification=disable_notification,
                 message_thread_id=message_thread_id,
                 reply_to_message_id=reply_to_message_id,
@@ -597,7 +597,7 @@ async def custom_copy_message(
         parse_mode=parse_mode,
         caption_entities=caption_entities,
         has_spoiler=has_spoiler,
-        video_cover=video_cover, #ignore
+        video_cover=video_cover,  # type: ignore
         disable_notification=disable_notification,
         message_thread_id=message_thread_id,
         reply_to_message_id=reply_to_message_id,
@@ -605,16 +605,24 @@ async def custom_copy_message(
         schedule_date=schedule_date,
         protect_content=protect_content,
         allow_paid_broadcast=allow_paid_broadcast,
-        invert_media=invert_media,
+        invert_media=invert_media,  # type: ignore
         reply_markup=reply_markup
     )
 
-
+from pyrogram.methods.messages.send_cached_media import SendCachedMedia
+from pyrogram.methods.messages.send_video import SendVideo
+from pyrogram.methods.messages.copy_message import CopyMessage
 
 Client.send_cached_media = custom_send_cached_media
+SendCachedMedia.send_cached_media = custom_send_cached_media
+
 Client.send_video = custom_send_video
+SendVideo.send_video = custom_send_video
+
 types.Message.copy = custom_copy
+
 Client.copy_message = custom_copy_message
+CopyMessage.copy_message = custom_copy_message
 
 
 log.info("Custom Pyrogram methods have been applied.")

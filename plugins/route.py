@@ -149,10 +149,6 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
     req_length = until_bytes - from_bytes + 1
     part_count = math.ceil((until_bytes + 1) / chunk_size) - math.floor(offset / chunk_size)
-    body = tg_connect.yield_file(
-        file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
-    )
-
     mime_type = guess_mime_type(file_id.file_name, file_id.mime_type)
     file_name = file_id.file_name or f"{secrets.token_hex(2)}.unknown"
 
@@ -169,12 +165,10 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             mime_type = "application/octet-stream"
             file_name = f"{secrets.token_hex(2)}.unknown"
 
-    return web.Response(
+    response = web.StreamResponse(
         status=206 if range_header else 200,
-        body=body,
         headers={
             "Content-Type": f"{mime_type}",
-            "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
             "Content-Length": str(req_length),
             "Content-Disposition": (
                 f'attachment; filename="{file_name}"'
@@ -189,3 +183,14 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges",
         },
     )
+    if range_header:
+        response.headers["Content-Range"] = f"bytes {from_bytes}-{until_bytes}/{file_size}"
+
+    await response.prepare(request)
+    if request.method != "HEAD":
+        async for chunk in tg_connect.yield_file(
+            file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
+        ):
+            await response.write(chunk)
+    await response.write_eof()
+    return response

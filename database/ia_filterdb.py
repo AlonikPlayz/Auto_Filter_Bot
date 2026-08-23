@@ -48,6 +48,7 @@ else:
 @instance.register
 class Media(Document):
     file_id = fields.StrField(attribute="_id")
+    file_unique_id = fields.StrField(allow_none=True)
     file_ref = fields.StrField(allow_none=True)
     file_name = fields.StrField(required=True)
     file_size = fields.IntField(required=True)
@@ -64,6 +65,7 @@ class Media(Document):
 @instance2.register
 class Media2(Document):
     file_id = fields.StrField(attribute="_id")
+    file_unique_id = fields.StrField(allow_none=True)
     file_ref = fields.StrField(allow_none=True)
     file_name = fields.StrField(required=True)
     file_size = fields.IntField(required=True)
@@ -104,18 +106,31 @@ async def check_db_size(db):
 async def save_file(media):
     """Save file in database, with detailed logging."""
     file_id, file_ref = unpack_new_file_id(media.file_id)
+    file_unique_id = getattr(media, "file_unique_id", None)
     file_name = re.sub(
         r"[_\-\.#+$%^&*()!~`,;:\"'?/<>\[\]{}=|\\]", " ", str(media.file_name)
     )
     file_name = re.sub(r"\s+", " ", file_name).strip()
     saveMedia = Media
     target_db = "Primary"
+    duplicate_filter = {"$or": [{"file_id": file_id}]}
+    if file_unique_id:
+        duplicate_filter["$or"].append({"file_unique_id": file_unique_id})
+    try:
+        exists = await Media.find_one(duplicate_filter)
+        if exists:
+            logger.info(f"[SKIP] '{file_name}' already in Primary DB.")
+            return False, 0
+        if MULTIPLE_DB:
+            exists = await Media2.find_one(duplicate_filter)
+            if exists:
+                logger.info(f"[SKIP] '{file_name}' already in Secondary DB.")
+                return False, 0
+    except Exception as e:
+        logger.error("Error during duplicate check; continuing with save.", exc_info=e)
+
     if MULTIPLE_DB:
         try:
-            exists = await Media.find_one({"file_id": file_id})
-            if exists:
-                logger.info(f"[SKIP] '{file_name}' already in Primary DB.")
-                return False, 0
             primary_db_size = await check_db_size(db)
             if primary_db_size >= 407:
                 saveMedia = Media2
@@ -126,9 +141,11 @@ async def save_file(media):
                 "Error during MULTIPLE_DB check; defaulting to primary DB.", exc_info=e
             )
     try:
-        cover_to_use = getattr(getattr(media, "cover", None), "file_id", None)
+        cover_media = getattr(media, "video_cover", None) or getattr(media, "cover", None)
+        cover_to_use = getattr(cover_media, "file_id", None)
         record = saveMedia(
             file_id=file_id,
+            file_unique_id=file_unique_id,
             file_ref=file_ref,
             file_name=file_name,
             file_size=media.file_size,

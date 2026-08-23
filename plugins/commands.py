@@ -393,8 +393,8 @@ async def start(client, message):
             try:
                 cover = None
                 if COVERX:
-                    details= await get_file_details(file_id)
-                    cover = details.get('cover', None)
+                    details = await get_file_details(file_id)
+                    cover = details[0].cover if details and details[0].cover else None
                 btn = await stream_buttons(message.from_user.id, file_id)
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,

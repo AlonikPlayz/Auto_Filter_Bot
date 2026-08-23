@@ -258,7 +258,7 @@ async def media_handler(bot, message):
     if not media:
         return
 
-    media.file_type = next(ft for ft in ("document", "video", "audio") if hasattr(message, ft))
+    media.file_type = next(ft for ft in ("document", "video", "audio") if getattr(message, ft, None))
     media.caption = message.caption or ""
     success, info = await save_file(media)
     if not success:

@@ -30,8 +30,7 @@ BTN_URL_REGEX = re.compile(
     r"(\[([^\[]+?)\]\((buttonurl|buttonalert):(?:/{0,2})(.+?)(:same)?\))"
 )
 
-
-imdb = IMDBKit() 
+imdb = IMDBKit()
 BANNED = {}
 SMART_OPEN = '“'
 SMART_CLOSE = '”'
@@ -145,7 +144,7 @@ async def users_broadcast(user_id, message, is_pin):
         return True, "Success"
     except FloodWait as e:
         await asyncio.sleep(e.x)
-        return await users_broadcast(user_id, message)
+        return await users_broadcast(user_id, message, is_pin)
     except InputUserDeactivated:
         await db.delete_user(int(user_id))
         logging.info(f"{user_id}-Removed from Database, since deleted account.")
@@ -172,7 +171,7 @@ async def groups_broadcast(chat_id, message, is_pin):
         return "Success"
     except FloodWait as e:
         await asyncio.sleep(e.x)
-        return await groups_broadcast(chat_id, message)
+        return await groups_broadcast(chat_id, message, is_pin)
     except Exception:
         await db.delete_chat(chat_id)
         return "Error"

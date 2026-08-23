@@ -1549,15 +1549,7 @@
 
         function vlc_player(event) {
             const url = "{{file_url}}";
-            const stripped = url.replace(/^https?:\/\//, "");
-
-            // 1️⃣ Try fast VLC deep-link first (works on some devices)
-            window.location.href = `vlc://${stripped}`;
-
-            // 2️⃣ Fallback to Android Intent (works everywhere)
-            setTimeout(() => {
-                window.location.href = buildIntentUrl(url, "org.videolan.vlc");
-            }, 500);
+            window.location.href = buildIntentUrl(url, "org.videolan.vlc");
         }
 
         function mx_player() {

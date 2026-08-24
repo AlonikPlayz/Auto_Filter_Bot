@@ -33,7 +33,6 @@ logging.getLogger("pymongo").setLevel(logging.WARNING)
 
 botStartTime = time.time()
 
-
 def get_plugins_names(plugins_dir="plugins"):
     plugins_path = Path(plugins_dir)
     if not plugins_path.exists():
@@ -48,6 +47,7 @@ def get_plugins_names(plugins_dir="plugins"):
 
 async def dreamxbotz_start():
     logging.info('\n\nInitializing DreamxBotz')
+    dreamxbotz.loop = asyncio.get_running_loop()
     await dreamxbotz.start()
     bot_info = await dreamxbotz.get_me()
     dreamxbotz.username = bot_info.username

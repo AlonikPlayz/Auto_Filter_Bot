@@ -46,7 +46,7 @@ async def broadcast_users(bot, message):
 
     is_pin = dreamxbotz_user_response.text == "Yes"
     b_msg = message.reply_to_message
-    users = [user async for user in await db.get_all_users()]
+    users = [user async for user in db.get_all_users()]
     total_users = len(users)
     dreamxbotz_status_msg = await message.reply_text("📤 <b>Broadcasting your message...</b>")
     success = blocked = deleted = failed = 0

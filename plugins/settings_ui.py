@@ -3,7 +3,7 @@ import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import MessageNotModified, FloodWait
-from info import IS_VERIFY, LOG_API_CHANNEL
+from info import IS_VERIFY, LOG_CHANNEL
 from utils import get_settings, save_group_settings, delete_group_setting, is_check_admin
 from database.users_chats_db import db
 logger = logging.getLogger(__name__)
@@ -282,7 +282,10 @@ async def change_log(client, query):
     except Exception:
         pass
     await save_group_settings(int(grp_id), f'log', int(log_msg.text))
-    await client.send_message(LOG_API_CHANNEL, f"#Set_Log_Channel\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {chat.title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
+    try: 
+        await client.send_message(LOG_CHANNEL, f"#Set_Log_Channel\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {chat.title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
+    except Exception as e:
+        print(e)
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'log_setgs#{grp_id}')]
     ]
@@ -337,7 +340,10 @@ async def change_caption(client, query):
     await m.delete()
     await caption_msg.delete()
     await save_group_settings(int(grp_id), f'caption', caption_msg.text)
-    await client.send_message(LOG_API_CHANNEL, f"#Set_Caption\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
+    try: 
+        await client.send_message(LOG_CHANNEL, f"#Set_Caption\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
+    except Exception as e:
+        print(e)
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'caption_setgs#{grp_id}')]
     ]
@@ -470,7 +476,10 @@ async def set_shortener(client, query):
     await save_group_settings(int(grp_id), f'shortner{suffix}', url_msg.text)
     await save_group_settings(int(grp_id), f'api{suffix}', key_msg.text)
     log_message = f"#New_Shortner_Set\n\n ꜱʜᴏʀᴛɴᴇʀ ɴᴏ - {shortner_num}\nɢʀᴏᴜᴘ ʟɪɴᴋ - `{invite_link}`\n\nɢʀᴏᴜᴘ ɪᴅ : `{grp_id}`\nᴀᴅᴅᴇᴅ ʙʏ - `{user_id}`\nꜱʜᴏʀᴛɴᴇʀ ꜱɪᴛᴇ - {url_msg.text}\nꜱʜᴏʀᴛɴᴇʀ ᴀᴘɪ - `{key_msg.text}`"
-    await client.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True)
+    try: 
+        await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
+    except Exception as e:
+        print(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'shortner_menu#{shortner_num}#{grp_id}')]
@@ -600,7 +609,10 @@ async def set_time(client, query):
     await time_msg.delete()
     await save_group_settings(int(grp_id), key, int(time_msg.text))
     log_message = f"#New_Time_Set\n\n ᴛɪᴍᴇ ɴᴏ - {time_num}\nɢʀᴏᴜᴘ ʟɪɴᴋ - `{invite_link}`\n\nɢʀᴏᴜᴘ ɪᴅ : `{grp_id}`\nᴀᴅᴅᴇᴅ ʙʏ - `{user_id}`\nᴛɪᴍᴇ - {time_msg.text}"
-    await client.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True)
+    try:
+        await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
+    except Exception as e:
+        print(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'time_menu#{time_num}#{grp_id}')]
@@ -705,7 +717,10 @@ async def set_tutorial(client, query):
     await tutorial_msg.delete()
     await save_group_settings(int(grp_id), f'tutorial{suffix}', tutorial_msg.text)
     log_message = f"#New_Tutorial_Set\n\n ᴛᴜᴛᴏʀɪᴀʟ ɴᴏ - {tutorial_num}\nɢʀᴏᴜᴘ ʟɪɴᴋ - `{invite_link}`\n\nɢʀᴏᴜᴘ ɪᴅ : `{grp_id}`\nᴀᴅᴅᴇᴅ ʙʏ - `{user_id}`\nᴛᴜᴛᴏʀɪᴀʟ - {tutorial_msg.text}"
-    await client.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True)
+    try:
+        await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
+    except Exception as e:
+        print(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'tutorial_menu#{tutorial_num}#{grp_id}')]
@@ -767,3 +782,5 @@ async def process_group_deletion(client, query):
     except Exception as e:
         logger.error(f"Callback Error - {e}")
         await query.answer("An error occurred!", show_alert=True)
+
+

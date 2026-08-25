@@ -19,6 +19,7 @@ from shortzy import Shortzy
 
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -31,6 +32,8 @@ BTN_URL_REGEX = re.compile(
 )
 
 imdb = IMDBKit()
+
+
 BANNED = {}
 SMART_OPEN = '“'
 SMART_CLOSE = '”'
@@ -143,7 +146,7 @@ async def users_broadcast(user_id, message, is_pin):
             await m.pin(both_sides=True)
         return True, "Success"
     except FloodWait as e:
-        await asyncio.sleep(e.x)
+        await asyncio.sleep(e.value)
         return await users_broadcast(user_id, message, is_pin)
     except InputUserDeactivated:
         await db.delete_user(int(user_id))
@@ -170,7 +173,7 @@ async def groups_broadcast(chat_id, message, is_pin):
                 pass
         return "Success"
     except FloodWait as e:
-        await asyncio.sleep(e.x)
+        await asyncio.sleep(e.value)
         return await groups_broadcast(chat_id, message, is_pin)
     except Exception:
         await db.delete_chat(chat_id)

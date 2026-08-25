@@ -1,6 +1,6 @@
+import logging
 import re
 import os
-import logging
 import random
 import string
 from info import ULTRA_FAST_MODE, MAX_LIST_ELM, BAD_WORDS, LONG_IMDB_DESCRIPTION, IS_VERIFY, MAX_B_TN, TUTORIAL, TUTORIAL_2, TUTORIAL_3, LOG_CHANNEL, TMDB_ON_SEARCH
@@ -16,7 +16,6 @@ from database.users_chats_db import db
 from bs4 import BeautifulSoup
 import aiohttp
 from shortzy import Shortzy
-
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
 
 

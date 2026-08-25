@@ -14,6 +14,7 @@ from Script import script
 from bot import botStartTime
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 """-----------------------------------------https://t.me/dreamxbotz--------------------------------------"""
 

@@ -16,6 +16,7 @@ from pyrogram.errors import MessageIdInvalid, MessageNotModified, FloodWait
 from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 # Precomputed sets for faster lookups
 IGNORE_WORDS = {

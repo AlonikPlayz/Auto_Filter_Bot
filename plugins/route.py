@@ -11,6 +11,9 @@ from dreamxbotz.util.custom_dl import ByteStreamer
 from dreamxbotz.util.render_template import render_page
 import info
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
 
 routes = web.RouteTableDef()
 

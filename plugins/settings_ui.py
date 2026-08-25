@@ -6,7 +6,9 @@ from pyrogram.errors import MessageNotModified, FloodWait
 from info import IS_VERIFY, LOG_CHANNEL
 from utils import get_settings, save_group_settings, delete_group_setting, is_check_admin
 from database.users_chats_db import db
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 async def get_invite_link(client, grp_id):
     try:

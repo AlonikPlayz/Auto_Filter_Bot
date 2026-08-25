@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.private & filters.command(["font"]))
 async def style_buttons(c, m, cb=False):

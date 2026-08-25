@@ -10,6 +10,8 @@ import urllib.parse
 import logging
 import aiohttp
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 async def render_page(id, secure_hash, src=None):
     await dreamxbotz.get_messages(int(BIN_CHANNEL), int(id))

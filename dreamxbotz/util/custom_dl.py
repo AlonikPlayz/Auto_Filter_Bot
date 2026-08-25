@@ -11,6 +11,8 @@ from pyrogram.errors import AuthBytesInvalid
 from dreamxbotz.server.exceptions import FIleNotFound
 from pyrogram.file_id import FileId, FileType, ThumbnailSource
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 class ByteStreamer:
     def __init__(self, client: Client):

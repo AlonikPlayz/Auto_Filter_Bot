@@ -11,6 +11,8 @@ from utils import users_broadcast, groups_broadcast, temp, get_readable_time, cl
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
 lock = asyncio.Lock()
 
 @Client.on_callback_query(filters.regex(r'^broadcast_cancel'))

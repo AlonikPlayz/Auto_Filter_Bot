@@ -7,8 +7,8 @@ import logging
 from pyrogram.types import BotCommand
 from info import ADMINS, Bot_cmds
 
-logging.basicConfig(level=logging.INFO)
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.command(["stickerid"]))
 async def stickerid(bot, message):   

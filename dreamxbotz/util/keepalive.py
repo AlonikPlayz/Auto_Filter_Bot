@@ -5,6 +5,9 @@ import aiohttp
 import traceback
 from info import PING_INTERVAL, URL
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
 async def ping_server():
     sleep_time = PING_INTERVAL
     while True:

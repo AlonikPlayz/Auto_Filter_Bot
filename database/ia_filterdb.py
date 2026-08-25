@@ -19,7 +19,7 @@ from functools import lru_cache
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.ERROR)
 # ---------------------------------------------------------
 
 # Global cache for DB size

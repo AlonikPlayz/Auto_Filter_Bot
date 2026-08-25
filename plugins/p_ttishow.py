@@ -14,7 +14,6 @@ from Script import script
 from bot import botStartTime
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 """-----------------------------------------https://t.me/dreamxbotz--------------------------------------"""
 
@@ -48,7 +47,7 @@ async def save_group(bot, message):
         try:
             await db.connect_group(message.chat.id, message.from_user.id)
         except Exception as e:
-            logging.error(f"DB error connecting group: {e}")
+            logger.error(f"DB error connecting group: {e}")
     else:
         settings = await get_settings(message.chat.id)
 

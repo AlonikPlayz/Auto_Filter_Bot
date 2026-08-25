@@ -29,7 +29,6 @@ from datetime import datetime, timedelta
 lock = asyncio.Lock()
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 
@@ -1287,7 +1286,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await asyncio.sleep(DELETE_TIME)
                 return await msg.delete()
         except Exception:
-            logging.exception("Error in give_trial callback")
+            logger.exception("Error in give_trial callback")
 
 
 
@@ -1335,7 +1334,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'premium_info' callback")
+            logger.exception("Exception in 'premium_info' callback")
 
 
     elif query.data == "buy_info":
@@ -1354,7 +1353,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'buy_info' callback")
+            logger.exception("Exception in 'buy_info' callback")
 
     elif query.data == "upi_info":
         try:
@@ -1371,7 +1370,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'upi_info' callback")
+            logger.exception("Exception in 'upi_info' callback")
 
     elif query.data == "star_info":
         try:
@@ -1389,7 +1388,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'star' callback")
+            logger.exception("Exception in 'star' callback")
 
 
     elif query.data.startswith("grp_pm"):

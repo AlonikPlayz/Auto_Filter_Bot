@@ -10,7 +10,6 @@ from PIL import Image
 from info import DREAMXBOTZ_IMAGE_FETCH, TMDB_API_KEY, MAX_LIST_ELM
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 LONG_IMDB_DESCRIPTION = False
 

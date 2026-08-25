@@ -5,7 +5,6 @@ from pyrogram import Client, types
 from info import API_ID, API_HASH, BOT_TOKEN, SESSION
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 class dreamcinezoneXBot(Client):
 
@@ -41,7 +40,7 @@ class dreamcinezoneXBot(Client):
         Example:
             .. code-block:: python
                 for message in app.iter_messages("pyrogram", 1, 15000):
-                    print(message.text)
+                    logger.info(message.text)
         """
         current = offset
         while True:

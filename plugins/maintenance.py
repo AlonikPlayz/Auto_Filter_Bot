@@ -6,7 +6,6 @@ from Script import script
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 @Client.on_message(filters.text & (filters.group | filters.private) & filters.incoming & ~filters.regex(r"^/") & ~filters.user(ADMINS) & ~filters.chat(SUPPORT_CHAT_ID), group=-5)

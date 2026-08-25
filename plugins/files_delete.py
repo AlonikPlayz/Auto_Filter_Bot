@@ -5,7 +5,6 @@ from info import DELETE_CHANNELS
 from database.ia_filterdb import Media, Media2, unpack_new_file_id
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 media_filter = filters.document | filters.video | filters.audio
 

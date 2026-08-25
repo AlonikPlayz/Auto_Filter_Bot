@@ -11,7 +11,6 @@ from utils import users_broadcast, groups_broadcast, temp, get_readable_time, cl
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 lock = asyncio.Lock()
 
@@ -143,7 +142,7 @@ async def broadcast_group(bot, message):
             try:
                 sts = await groups_broadcast(int(chat['id']), b_msg, is_pin)
             except Exception:
-                logging.exception(f"Error broadcasting to group {chat['id']}")
+                logger.exception(f"Error broadcasting to group {chat['id']}")
                 sts = 'Error'
             if sts == "Success":
                 success += 1

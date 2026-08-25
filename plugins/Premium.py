@@ -19,7 +19,6 @@ from pyrogram.types import (
 )
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 @Client.on_message(filters.command("remove_premium") & filters.user(ADMINS))

@@ -13,7 +13,6 @@ from info import (
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 class Database:    
     def __init__(self, uri, database_name):

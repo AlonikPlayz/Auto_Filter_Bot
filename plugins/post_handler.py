@@ -15,7 +15,6 @@ from utils import temp
 
 #code is created by @bharath_boy for public use so atleast don't remove credits
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 post_sessions = {}
 

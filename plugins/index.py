@@ -11,7 +11,6 @@ from utils import temp, get_readable_time
 from math import ceil
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 lock = asyncio.Lock()
 

@@ -8,7 +8,6 @@ from utils import get_settings, save_group_settings, delete_group_setting, is_ch
 from database.users_chats_db import db
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 async def get_invite_link(client, grp_id):
     try:
@@ -287,7 +286,7 @@ async def change_log(client, query):
     try: 
         await client.send_message(LOG_CHANNEL, f"#Set_Log_Channel\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {chat.title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
     except Exception as e:
-        print(e)
+        logger.error(e)
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'log_setgs#{grp_id}')]
     ]
@@ -345,7 +344,7 @@ async def change_caption(client, query):
     try: 
         await client.send_message(LOG_CHANNEL, f"#Set_Caption\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {query.from_user.username}")
     except Exception as e:
-        print(e)
+        logger.error(e)
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'caption_setgs#{grp_id}')]
     ]
@@ -481,7 +480,7 @@ async def set_shortener(client, query):
     try: 
         await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'shortner_menu#{shortner_num}#{grp_id}')]
@@ -614,7 +613,7 @@ async def set_time(client, query):
     try:
         await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'time_menu#{time_num}#{grp_id}')]
@@ -722,7 +721,7 @@ async def set_tutorial(client, query):
     try:
         await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
     btn = [
         [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data=f'tutorial_menu#{tutorial_num}#{grp_id}')]

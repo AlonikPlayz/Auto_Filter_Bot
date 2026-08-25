@@ -16,7 +16,6 @@ from info import BIN_CHANNEL
 from dreamxbotz.util.file_properties import get_name
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 # Telegraph init
 TELEGRAPH_ACCESS_TOKEN = os.environ.get("TELEGRAPH_ACCESS_TOKEN") or "38a8ac190ac77ad863fa0c3fa98bdf0bb563fa200211b168062e5313b401"

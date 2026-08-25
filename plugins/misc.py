@@ -9,7 +9,6 @@ from database.ia_filterdb import dreamxbotz_get_movies, dreamxbotz_get_series
 from pyrogram.enums import ParseMode
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.command('id'))
 async def showid(client, message):

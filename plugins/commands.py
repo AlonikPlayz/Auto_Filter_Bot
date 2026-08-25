@@ -28,7 +28,6 @@ from info import (
 from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename, get_random_mix_id
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 TIMEZONE = "Asia/Kolkata"
 BATCH_FILES = {}

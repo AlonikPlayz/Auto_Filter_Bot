@@ -58,7 +58,7 @@ async def broadcast_users(bot, message):
             _, result = await users_broadcast(int(user["id"]), b_msg, is_pin)
             return result
         except Exception:
-            logging.exception(f"Error sending broadcast to {user['id']}")
+            logger.exception(f"Error sending broadcast to {user['id']}")
             return "Error"
 
     async with lock:

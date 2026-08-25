@@ -140,7 +140,9 @@ async def is_check_admin(bot, chat_id, user_id):
     
 async def users_broadcast(user_id, message, is_pin):
     try:
-        m=await message.copy(chat_id=user_id)
+        if not hasattr(message, 'web_page_preview'):
+            message.web_page_preview = None
+        m = await message.copy(chat_id=user_id)
         if is_pin:
             await m.pin(both_sides=True)
         return True, "Success"
@@ -159,11 +161,15 @@ async def users_broadcast(user_id, message, is_pin):
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - PeerIdInvalid")
         return False, "Error"
-    except Exception:
+    except Exception as e:
+        logging.error(f"[BROADCAST FAIL] user={user_id} | {type(e).__name__}: {e}")
         return False, "Error"
+
 
 async def groups_broadcast(chat_id, message, is_pin):
     try:
+        if not hasattr(message, 'web_page_preview'):
+            message.web_page_preview = None
         m = await message.copy(chat_id=chat_id)
         if is_pin:
             try:

@@ -1,8 +1,9 @@
-﻿from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_settings_text
+import logging
+from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_settings_text
 from rapidfuzz import process
 from dreamxbotz.util.file_properties import get_name, get_hash
 from urllib.parse import quote_plus
-import logging
+
 from database.ia_filterdb import Media, Media2, get_search_results, get_bad_files
 from database.config_db import mdb
 from pyrogram.errors import MessageIdInvalid, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -29,7 +30,6 @@ from datetime import datetime, timedelta
 lock = asyncio.Lock()
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 
@@ -1012,7 +1012,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data.startswith("opnsetgrp"):
         ident, grp_id = query.data.split("#")
         userid = query.from_user.id if query.from_user else None
-        st = await client.get_chat_member(grp_id, userid)
+        st = await client.get_chat_member(int(grp_id), userid)
         if (
                 st.status != enums.ChatMemberStatus.ADMINISTRATOR
                 and st.status != enums.ChatMemberStatus.OWNER
@@ -1035,7 +1035,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data.startswith("opnsetpm"):
         ident, grp_id = query.data.split("#")
         userid = query.from_user.id if query.from_user else None
-        st = await client.get_chat_member(grp_id, userid)
+        st = await client.get_chat_member(int(grp_id), userid)
         if (
                 st.status != enums.ChatMemberStatus.ADMINISTRATOR
                 and st.status != enums.ChatMemberStatus.OWNER
@@ -1361,7 +1361,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await asyncio.sleep(DELETE_TIME)
                 return await msg.delete()
         except Exception:
-            logging.exception("Error in give_trial callback")
+            logger.exception("Error in give_trial callback")
 
 
 
@@ -1408,7 +1408,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'premium_info' callback")
+            logger.exception("Exception in 'premium_info' callback")
 
 
     elif query.data == "buy_info":
@@ -1427,7 +1427,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'buy_info' callback")
+            logger.exception("Exception in 'buy_info' callback")
 
     elif query.data == "upi_info":
         try:
@@ -1444,7 +1444,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'upi_info' callback")
+            logger.exception("Exception in 'upi_info' callback")
 
     elif query.data == "star_info":
         try:
@@ -1462,7 +1462,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup
             )
         except Exception:
-            logging.exception("Exception in 'star' callback")
+            logger.exception("Exception in 'star' callback")
 
 
     elif query.data.startswith("grp_pm"):

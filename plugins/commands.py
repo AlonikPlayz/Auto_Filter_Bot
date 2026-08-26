@@ -22,12 +22,11 @@ from info import (
     VERIFY_IMG, TWO_VERIFY_GAP, UPDATE_CHNL_LNK, PICS, PICS_URL, ADMINS, SUBSCRIPTION, OWNER_LNK , 
     OWNER_UPI_ID, QR_CODE, AUTH_CHANNELS, AUTH_REQ_CHANNELS, FSUB_PICS, THREE_VERIFY_GAP, CUSTOM_FILE_CAPTION,
     COVERX, PROTECT_CONTENT, DELETE_TIME, PREMIUM_STREAM_MODE, STREAM_MODE, SUPPORT_CHAT_ID, REQST_CHANNEL,
-    LOG_API_CHANNEL, SHORTENER_API, SHORTENER_API2, SHORTENER_API3, SHORTENER_WEBSITE, SHORTENER_WEBSITE2, SHORTENER_WEBSITE3,
+    LOG_CHANNEL, SHORTENER_API, SHORTENER_API2, SHORTENER_API3, SHORTENER_WEBSITE, SHORTENER_WEBSITE2, SHORTENER_WEBSITE3,
     
 )
 from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename, get_random_mix_id
 
-logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 TIMEZONE = "Asia/Kolkata"
@@ -1041,7 +1040,7 @@ async def save_caption(client, message):
         return await message.reply_text("<code>ɢɪᴠᴇ ᴍᴇ ᴀ ᴄᴀᴘᴛɪᴏɴ ᴀʟᴏɴɢ ᴡɪᴛʜ ɪᴛ.\n\nᴇxᴀᴍᴘʟᴇ -\n\nꜰᴏʀ ꜰɪʟᴇ ɴᴀᴍᴇ ꜱᴇɴᴅ <code>{file_name}</code>\nꜰᴏʀ ꜰɪʟᴇ ꜱɪᴢᴇ ꜱᴇɴᴅ <code>{file_size}</code>\n\n<code>/set_caption {file_name}</code></code>")
     await save_group_settings(grp_id, 'caption', caption)
     await message.reply_text(f"ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄʜᴀɴɢᴇᴅ ᴄᴀᴘᴛɪᴏɴ ꜰᴏʀ {title}\n\nᴄᴀᴘᴛɪᴏɴ - {caption}", disable_web_page_preview=True)
-    await client.send_message(LOG_API_CHANNEL, f"#Set_Caption\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
+    await client.send_message(LOG_CHANNEL, f"#Set_Caption\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ: {grp_id}\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
 
 
 @Client.on_message(filters.command(["set_tutorial", "set_tutorial_2", "set_tutorial_3"]))
@@ -1076,7 +1075,7 @@ async def set_tutorial(client, message: Message):
         disable_web_page_preview=True
     )
     await client.send_message(
-        LOG_API_CHANNEL,
+        LOG_CHANNEL,
         f"#Set_{tutorial_key.title()}_Video\n\n"
         f"ɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n"
         f"ɢʀᴏᴜᴘ ɪᴅ : {grp_id}\n"
@@ -1115,7 +1114,7 @@ async def handle_shortner_command(c, m, shortner_key, api_key, log_prefix, fallb
             f"\n\nꜱɪᴛᴇ - {URL}\n\nᴀᴘɪ - `{API}`"
             f"\n\nɢʀᴏᴜᴘ - {grp_link}\nɢʀᴏᴜᴘ ɪᴅ - `{grp_id}`"
         )
-        await c.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True)
+        await c.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True)
     except Exception as e:
         await save_group_settings(grp_id, shortner_key, fallback_url)
         await save_group_settings(grp_id, api_key, fallback_api)
@@ -1174,7 +1173,7 @@ async def set_log(client, message):
     link = (await client.get_chat(message.chat.id)).invite_link
     grp_link = f"[{message.chat.title}]({link})"
     log_message = f"#New_Log_Channel_Set\n\nɴᴀᴍᴇ - {user_info}\n\nɪᴅ - `{user_id}`\n\nʟᴏɢ ᴄʜᴀɴɴᴇʟ ɪᴅ - `{log}`\nɢʀᴏᴜᴘ ʟɪɴᴋ - `{grp_link}`\n\nɢʀᴏᴜᴘ ɪᴅ : `{grp_id}`"
-    await client.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True) 
+    await client.send_message(LOG_CHANNEL, log_message, disable_web_page_preview=True) 
 
 
 @Client.on_message(filters.command('set_time'))
@@ -1193,7 +1192,7 @@ async def set_time(client, message):
         return await message.reply_text("<b>ᴄᴏᴍᴍᴀɴᴅ ɪɴᴄᴏᴍᴘʟᴇᴛᴇ\n\nᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ʟɪᴋᴇ ᴛʜɪꜱ - <code>/set_time 600</code> [ ᴛɪᴍᴇ ᴍᴜꜱᴛ ʙᴇ ɪɴ ꜱᴇᴄᴏɴᴅꜱ ]</b>")   
     await save_group_settings(grp_id, 'verify_time', time)
     await message.reply_text(f"<b>✅️ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇᴛ 2ɴᴅ ᴠᴇʀɪꜰʏ ᴛɪᴍᴇ ꜰᴏʀ {title}\n\nᴛɪᴍᴇ - <code>{time}</code></b>")
-    await client.send_message(LOG_API_CHANNEL, f"#Set_2nd_Verify_Time\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ : {grp_id}\n\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
+    await client.send_message(LOG_CHANNEL, f"#Set_2nd_Verify_Time\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ : {grp_id}\n\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
 @Client.on_message(filters.command('set_time_2'))
 async def set_time_2(client, message):
     chat_type = message.chat.type
@@ -1210,7 +1209,7 @@ async def set_time_2(client, message):
         return await message.reply_text("<b>ᴄᴏᴍᴍᴀɴᴅ ɪɴᴄᴏᴍᴘʟᴇᴛᴇ\n\nᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ʟɪᴋᴇ ᴛʜɪꜱ - <code>/set_time 3600</code> [ ᴛɪᴍᴇ ᴍᴜꜱᴛ ʙᴇ ɪɴ ꜱᴇᴄᴏɴᴅꜱ ]</b>")   
     await save_group_settings(grp_id, 'third_verify_time', time)
     await message.reply_text(f"<b>✅️ ꜱᴜᴄᴄESꜱꜰᴜʟʟʏ ꜱᴇᴛ 3ʀᴅ ᴠᴇʀɪꜰʏ ᴛɪᴍᴇ ꜰᴏʀ {title}\n\nᴛɪᴍᴇ - <code>{time}</code></b>")
-    await client.send_message(LOG_API_CHANNEL, f"#Set_3rd_Verify_Time\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ : {grp_id}\n\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
+    await client.send_message(LOG_CHANNEL, f"#Set_3rd_Verify_Time\n\nɢʀᴏᴜᴘ ɴᴀᴍᴇ : {title}\n\nɢʀᴏᴜᴘ ɪᴅ : {grp_id}\n\nɪɴᴠɪᴛᴇ ʟɪɴᴋ : {invite_link}\n\nᴜᴘᴅᴀᴛᴇᴅ ʙʏ : {message.from_user.username}")
 
 
 @Client.on_message(filters.command('details'))
@@ -1339,7 +1338,7 @@ async def set_fsub(client, message):
         await message.reply_text(f"sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴛ ꜰꜱᴜʙ ᴄʜᴀɴɴᴇʟ(ꜱ) ғᴏʀ {title} ᴛᴏ\n\n{channels}")
         mention = message.from_user.mention if message.from_user else "Unknown"
         await client.send_message(
-            LOG_API_CHANNEL,
+            LOG_CHANNEL,
             f"#Fsub_Channel_set\n\n"
             f"ᴜꜱᴇʀ - {mention} ꜱᴇᴛ ᴛʜᴇ ꜰᴏʀᴄᴇ ᴄʜᴀɴɴᴇʟ(ꜱ) ꜰᴏʀ {title}:\n\n"
             f"ꜰꜱᴜʙ ᴄʜᴀɴɴᴇʟ(ꜱ):\n" + '\n'.join(channel_titles)
@@ -1347,7 +1346,7 @@ async def set_fsub(client, message):
     except Exception as e:
         err_text = f"⚠️ Error in set_fSub :\n{e}"
         logger.error(err_text)
-        await client.send_message(LOG_API_CHANNEL, err_text)
+        await client.send_message(LOG_CHANNEL, err_text)
 
 @Client.on_message(filters.private & filters.command("resetallgroup") & filters.user(ADMINS))
 async def reset_all_settings(client, message):
@@ -1411,7 +1410,7 @@ async def remove_fsub(client, message):
             await save_group_settings(grp_id, 'fsub', [])
             await message.reply_text(f"✅ ᴀʟʟ ғsᴜʙ ᴄʜᴀɴɴᴇʟs ʀᴇᴍᴏᴠᴇᴅ ғᴏʀ {title}")
             return await client.send_message(
-                LOG_API_CHANNEL,
+                LOG_CHANNEL,
                 f"#ғsᴜʙ_ʀᴇᴍᴏᴠᴇᴅ\n\n👤 {user.mention} ʀᴇᴍᴏᴠᴇᴅ ᴀʟʟ ғsᴜʙ ᴄʜᴀɴɴᴇʟs ғᴏʀ {title}."
             )
         try:
@@ -1437,7 +1436,7 @@ async def remove_fsub(client, message):
             "\n".join(r_t)
         )
         await client.send_message(
-            LOG_API_CHANNEL,
+            LOG_CHANNEL,
             f"#ғsᴜʙ_ᴄʜᴀɴɴᴇʟ_ʀᴇᴍᴏᴠᴇᴅ\n\n👤 {user.mention} ʀᴇᴍᴏᴠᴇᴅ ғsᴜʙ ᴄʜᴀɴɴᴇʟ(s) ғʀᴏᴍ {title}:\n" +
             "\n".join(r_t)
         )

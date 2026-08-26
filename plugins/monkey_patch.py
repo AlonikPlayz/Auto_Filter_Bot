@@ -12,11 +12,6 @@ from pyrogram.file_id import FileType
 
 from pyrogram import Client
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s ",
-    force=True
-)
 pyro_log = logging.getLogger("pyrogram")
 pyro_log.setLevel(logging.WARNING)
 
@@ -571,6 +566,10 @@ SendCachedMedia.send_cached_media = custom_send_cached_media
 Client.send_video = custom_send_video
 SendVideo.send_video = custom_send_video
 
+
+Client.send_video = custom_send_video
+SendVideo.send_video = custom_send_video
+
 types.Message.copy = custom_copy
 
 Client.copy_message = custom_copy_message
@@ -578,3 +577,71 @@ CopyMessage.copy_message = custom_copy_message
 
 
 log.info("Custom Pyrogram methods have been applied.")
+
+import asyncio
+from pyrogram.types import Message
+import pyrogram
+
+# ── Global patch: Message.copy() uses web_page_preview which was removed in
+#    Pyrogram v2 / Kurigram. Inject it as None before every copy() call.
+if not getattr(Message, "_copy_patched", False):
+    Message._copy_patched = True
+    _original_copy = Message.copy
+    async def _patched_copy(self, *args, **kwargs):
+        if not hasattr(self, "web_page_preview"):
+            self.web_page_preview = None
+        return await _original_copy(self, *args, **kwargs)
+    Message.copy = _patched_copy
+
+if not getattr(Message, "_listen_patched", False):
+    Message._listen_patched = True
+    Message._original_parse = Message._parse
+
+    @staticmethod
+    async def _custom_parse(client, message, users, chats, *args, **kwargs):
+        msg = await Message._original_parse(client, message, users, chats, *args, **kwargs)
+        if hasattr(client, "listen_futures"):
+            chat_id = getattr(getattr(msg, "chat", None), "id", None)
+            user_id = getattr(getattr(msg, "from_user", None), "id", None)
+            key = (chat_id, user_id)
+            key_chat = (chat_id, None)
+
+            if key in client.listen_futures:
+                future = client.listen_futures.pop(key)
+                if not future.done():
+                    future.set_result(msg)
+                raise pyrogram.StopPropagation
+                
+            if key_chat in client.listen_futures:
+                future = client.listen_futures.pop(key_chat)
+                if not future.done():
+                    future.set_result(msg)
+                raise pyrogram.StopPropagation      
+        return msg
+    Message._parse = _custom_parse
+
+
+async def custom_listen(self, chat_id, filters=None, timeout=60, user_id=None):
+    if not hasattr(self, "listen_futures"):
+        self.listen_futures = {} 
+    future = asyncio.get_running_loop().create_future()
+    if user_id:
+        key = (chat_id, user_id)
+    else:
+        key = (chat_id, None)
+     
+    self.listen_futures[key] = future
+    try:
+        if timeout:
+            message = await asyncio.wait_for(future, timeout=timeout)
+        else:
+            message = await future 
+        if filters:
+            if not await filters(self, message):
+                return await self.listen(chat_id, filters, timeout, user_id)       
+        return message
+    except asyncio.TimeoutError:
+        self.listen_futures.pop(key, None)
+        raise
+
+pyrogram.Client.listen = custom_listen

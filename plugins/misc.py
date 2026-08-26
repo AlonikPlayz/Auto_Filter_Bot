@@ -1,15 +1,14 @@
+import logging
 import os
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant, MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
-from utils import extract_user, get_file_id, get_poster
+from utils import extract_user, get_file_id
 from datetime import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-import logging
 from database.ia_filterdb import dreamxbotz_get_movies, dreamxbotz_get_series
 from pyrogram.enums import ParseMode
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.command('id'))
 async def showid(client, message):

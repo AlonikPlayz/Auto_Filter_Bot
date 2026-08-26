@@ -8,7 +8,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 @Client.on_message(filters.text & (filters.group | filters.private) & filters.incoming & ~filters.regex(r"^/") & ~filters.user(ADMINS) & ~filters.chat(SUPPORT_CHAT_ID), group=-5)
 async def maintenance_interceptor(bot: Client, message: Message):
     bot_id = bot.me.id

@@ -397,6 +397,11 @@ class Database:
         "expiry_time": {"$gt": datetime.datetime.now()}
         })
         return count
+        
+    async def get_all_premium_user_data(self):
+        return self.users.find({
+            "expiry_time": {"$gt": datetime.datetime.now()}
+        })
     
     async def get_bot_setting(self, bot_id, setting_key, default_value):
         bot = await self.botcol.find_one({'id': int(bot_id)}, {setting_key: 1, '_id': 0})

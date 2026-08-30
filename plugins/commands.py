@@ -252,7 +252,17 @@ async def start(client, message):
             grp_id = 0
             file_id = data
 
-        file_details_task = asyncio.create_task(get_file_details(file_id))
+        decoded_file_id = file_id
+        if not data.startswith("allfiles"):
+            try:
+                raw = base64.urlsafe_b64decode(file_id + "=" * (-len(file_id) % 4))
+                sep = raw.find(b"_")
+                if sep != -1:
+                    decoded_file_id = raw[sep + 1:].decode("latin1")
+            except Exception:
+                pass
+
+        file_details_task = asyncio.create_task(get_file_details(decoded_file_id))
         if not await db.has_premium_access(message.from_user.id): 
             try:
                 btn = []

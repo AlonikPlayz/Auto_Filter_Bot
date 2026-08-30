@@ -242,12 +242,12 @@ async def premium_button(client, callback_query: CallbackQuery):
 async def pre_checkout_handler(client, query: PreCheckoutQuery):
     try:
         if query.payload.startswith("dreamxpremium_"):
-            await query.answer(success=True)
+            await query.answer(ok=True)
         else:
-            await query.answer(success=False, error="⚠️ Invalid Purchase Type.")
+            await query.answer(ok=False, error_message="⚠️ Invalid Purchase Type.")
     except Exception as e:
         logger.error("Pre-checkout error: %s", e)
-        await query.answer(success=False, error="🚫 Unexpected Error Occurred.")
+        await query.answer(ok=False, error_message="🚫 Unexpected Error Occurred.")
 
 @Client.on_message(filters.successful_payment)
 async def successful_premium_payment(client, message):

@@ -7,6 +7,7 @@ from pyrogram.types import (
     InlineKeyboardButton,
     CallbackQuery,
     Message,
+    LinkPreviewOptions
 )
 from pyrogram.errors import MessageNotModified, MessageTooLong
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
@@ -251,7 +252,7 @@ async def update_post_preview(client: Client, session_id: int, chat_id: int, for
                 await client.edit_message_caption(chat_id, session["last_preview_message_id"], caption=final_caption, reply_markup=keyboard)
         else:
             text_content = f"<a href='{poster_to_use}'>&#8205;</a>{final_caption}" if poster_to_use else final_caption
-            await client.edit_message_text(chat_id, session["last_preview_message_id"], text_content, reply_markup=keyboard, disable_web_page_preview=False, invert_media=ABOVE_PREVIEW)
+            await client.edit_message_text(chat_id, session["last_preview_message_id"], text_content, reply_markup=keyboard, link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=ABOVE_PREVIEW))
     except MessageNotModified:
         pass
     except Exception as e:
@@ -609,9 +610,7 @@ async def finalize_and_post(client: Client, query: CallbackQuery, session_id: in
             text_content = f"<a href='{poster_to_use}'>&#8205;</a>{final_caption}" if poster_to_use else final_caption
             await client.send_message(
                 chat_id=MOVIE_UPDATE_CHANNEL, text=text_content,
-                
-                reply_markup=final_keyboard, disable_web_page_preview=False,
-                invert_media=ABOVE_PREVIEW
+                reply_markup=final_keyboard, link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=ABOVE_PREVIEW)
             )
 
         await status_msg.edit("✅ Post has been sent to the update channel.")

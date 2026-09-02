@@ -36,13 +36,7 @@ REQUEST_INVITE_LINK_CACHE: dict[int, str] = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    sticker = None
     try:
-        stick_id = "CAACAgUAAxkBAAEQJmJpViid_0yscWKPfh3RMCY8pIkmXwACMAcAAqzbsFexyKU6FPQAAjgE"
-        try:
-            sticker = await message.reply_sticker(sticker=stick_id)
-        except Exception as e:
-            logger.exception("reply_sticker failed: %s", e)
         if EMOJI_MODE:
             try:
                 await message.react(emoji=random.choice(REACTIONS), big=True)
@@ -90,7 +84,7 @@ async def start(client, message):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
             )
-            await sticker.delete()
+
             await asyncio.sleep(300)
             await dlt.delete()
             return         
@@ -102,7 +96,7 @@ async def start(client, message):
                       ]]
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply(script.GSTART_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME, temp.B_NAME), reply_markup=reply_markup, disable_web_page_preview=True)
-            await sticker.delete()
+
             await asyncio.sleep(2) 
             if not await db.get_chat(message.chat.id):
                 total=await client.get_chat_members_count(message.chat.id)
@@ -133,10 +127,13 @@ async def start(client, message):
                 gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
             else:
                 gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-            try:      
-                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
-            except Exception:
-                PIC = random.choice(PICS)
+            if len(PICS) == 1:
+                PIC = PICS[0]
+            else:
+                try:      
+                    PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+                except Exception:
+                    PIC = random.choice(PICS)
             await message.reply_photo(
                 photo=PIC,
                 caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
@@ -166,10 +163,13 @@ async def start(client, message):
                 gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
             else:
                 gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-            try:
-                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
-            except Exception:
-                PIC = random.choice(PICS)
+            if len(PICS) == 1:
+                PIC = PICS[0]
+            else:
+                try:
+                    PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+                except Exception:
+                    PIC = random.choice(PICS)
             await message.reply_photo(
                 photo=PIC,
                 caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
@@ -252,9 +252,17 @@ async def start(client, message):
             grp_id = 0
             file_id = data
 
-        # Fetch file details concurrently with user checks
-        file_details_task = asyncio.create_task(get_file_details(file_id))
+        decoded_file_id = file_id
+        if not data.startswith("allfiles"):
+            try:
+                raw = base64.urlsafe_b64decode(file_id + "=" * (-len(file_id) % 4))
+                sep = raw.find(b"_")
+                if sep != -1:
+                    decoded_file_id = raw[sep + 1:].decode("latin1")
+            except Exception:
+                pass
 
+        file_details_task = asyncio.create_task(get_file_details(decoded_file_id))
         if not await db.has_premium_access(message.from_user.id): 
             try:
                 btn = []
@@ -286,7 +294,6 @@ async def start(client, message):
             except Exception as e:
                 await log_error(client, f"❗️ Force Sub Error:\n\n{repr(e)}")
                 logger.error(f"❗️ Force Sub Error:\n\n{repr(e)}")
-
 
         user_id = m.from_user.id
         if not await db.has_premium_access(user_id):
@@ -324,7 +331,6 @@ async def start(client, message):
                         reply_markup=reply_markup,
                         parse_mode=enums.ParseMode.HTML
                     )
-                    await sticker.delete()
                     await asyncio.sleep(300) 
                     await n.delete()
                     await m.delete()
@@ -333,9 +339,7 @@ async def start(client, message):
                 logger.error("Error In Verification: %s", e)
                 pass
 
-        # Now, await the file details task
         files_ = await file_details_task
-
         if data.startswith("allfiles"):
             try:
                 files = temp.GETALL.get(file_id)
@@ -372,7 +376,7 @@ async def start(client, message):
                     )
                     filesarr.append(msg)
                 k = await client.send_message(chat_id=message.from_user.id, text=script.DEL_MSG.format(get_time(DELETE_TIME)), parse_mode=enums.ParseMode.HTML)
-                await sticker.delete()
+
                 await asyncio.sleep(DELETE_TIME)
                 for x in filesarr:
                     await x.delete()
@@ -414,14 +418,8 @@ async def start(client, message):
                         f_caption=DREAMX_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='')
                     except Exception:
                         return
-                await msg.edit_caption(
-                    f_caption,
-                    reply_markup=InlineKeyboardMarkup(btn)
-                )
-                k = await msg.reply(script.DEL_MSG.format(get_time(DELETE_TIME)),
-                    quote=True, parse_mode=enums.ParseMode.HTML
-                )
-                await sticker.delete()
+                await msg.edit_caption(f_caption, reply_markup=InlineKeyboardMarkup(btn))
+                k = await msg.reply(script.DEL_MSG.format(get_time(DELETE_TIME)), quote=True, parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(DELETE_TIME)
                 await msg.delete()
                 await k.edit_text("<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!</b>")
@@ -457,10 +455,7 @@ async def start(client, message):
             reply_markup=InlineKeyboardMarkup(btn)
         )
         
-        k = await msg.reply(script.DEL_MSG.format(get_time(DELETE_TIME)),
-            quote=True, parse_mode=enums.ParseMode.HTML
-        )
-        await sticker.delete()
+        k = await msg.reply(script.DEL_MSG.format(get_time(DELETE_TIME)), quote=True, parse_mode=enums.ParseMode.HTML)
         await asyncio.sleep(DELETE_TIME)
         await msg.delete()
         await k.edit_text("<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!</b>")
@@ -470,13 +465,6 @@ async def start(client, message):
     except Exception as e:
         logger.exception(f"Error In /start command - {e}")
         pass
-    finally:
-        if sticker:
-            try:
-                await sticker.delete()
-            except Exception as e:
-                logger.exception(f"Error In Deleting Sticker - {e}")
-                pass
 
 async def stream_buttons(user_id: int, file_id: str):
     if STREAM_MODE and not PREMIUM_STREAM_MODE:

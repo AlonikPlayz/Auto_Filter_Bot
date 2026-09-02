@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 
 from database.ia_filterdb import Media, Media2, get_search_results, get_bad_files
 from database.config_db import mdb
-from pyrogram.errors import MessageIdInvalid, UserIsBlocked, MessageNotModified, PeerIdInvalid
+from pyrogram.errors import MessageIdInvalid, UserIsBlocked, MessageNotModified, PeerIdInvalid, MessageDeleteForbidden
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from info import (
@@ -972,7 +972,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 return
             await query.answer(url=f"https://t.me/{temp.U_NAME}?start={kk}_{file_id}")
             if query.message.chat.type == enums.ChatType.PRIVATE:
-                await query.message.delete()
+                try:
+                    await query.message.delete()
+                except MessageDeleteForbidden:
+                    pass
         except Exception as e:
             await log_error(client, f"❌ Error in checksub callback:\n\n{repr(e)}")
             logger.error(f"❌ Error in checksub callback:\n\n{repr(e)}")
@@ -1263,10 +1266,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
         try:
-            try:
-                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
-            except Exception:
-                PIC = random.choice(PICS)
+            if len(PICS) == 1:
+                PIC = PICS[0]
+            else:
+                try:
+                    PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+                except Exception:
+                    PIC = random.choice(PICS)
             await client.edit_message_media(
                 query.message.chat.id,
                 query.message.id,

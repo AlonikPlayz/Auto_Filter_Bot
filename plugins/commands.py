@@ -793,6 +793,10 @@ async def requests(bot, message):
 async def send_msg(bot, message):
     if message.reply_to_message:
         target_id = message.text.split(" ", 1)[1]
+        try:
+            target_id = int(target_id)
+        except ValueError:
+            pass  # leave as-is in case it's a @username instead of a numeric ID
         out = "Users Saved In DB Are:\n\n"
         success = False
         try:

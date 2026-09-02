@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{file_name}}</title>
+    <title>RajatFiles | {{file_name}}</title>
     <style>
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .logo { font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+        .header a.link { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
+        .header a.link:hover { color: var(--accent); }
         :root {
             --bg: #0f1115;
             --card: #1a1d24;
@@ -66,11 +77,18 @@
     </style>
 </head>
 <body>
-    <div class="card">
+    <div>
+        <div class="header">
+            <a href="https://t.me/RajatFiles" class="logo">RajatFiles</a>
+            <a href="https://t.me/RajatFilesGroup" class="link">Request Group</a>
+            <a href="https://t.me/RFAdvanceBot" class="link">Our Bot</a>
+        </div>
+        <div class="card">
         <div class="icon">📄</div>
         <div class="file-title" id="fileTitle">{{file_name}}</div>
         <div class="file-size">{{file_size}}</div>
         <button class="btn-primary" onclick="downloadFile()">⬇ Download File</button>
+    </div>
     </div>
 
     <script>

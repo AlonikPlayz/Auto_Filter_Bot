@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{file_name}}</title>
+    <title>RajatFiles | {{file_name}}</title>
     <style>
         :root {
             --bg: #0f1115;
@@ -95,6 +95,30 @@
             font-size: 0.82rem;
             color: #fbbf24;
         }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .header-links {
+            display: flex;
+            gap: 14px;
+        }
+        .header-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .header-links a:hover { color: var(--accent); }
         @media (max-width: 480px) {
             .actions { flex-direction: column; }
             .btn, .speed-select { width: 100%; justify-content: center; }
@@ -103,6 +127,13 @@
 </head>
 <body>
     <div class="container">
+        <div class="header">
+            <a href="https://t.me/RajatFiles" class="logo">RajatFiles</a>
+            <div class="header-links">
+                <a href="https://t.me/RajatFilesGroup">Request Group</a>
+                <a href="https://t.me/RFAdvanceBot">Our Bot</a>
+            </div>
+        </div>
         <div class="player-wrap">
             <video id="player" controls playsinline>
                 <source src="{{file_url}}" />

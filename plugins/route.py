@@ -80,6 +80,7 @@ class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
     range_header = request.headers.get("Range", 0)
+    force_download = request.rel_url.query.get("dl") == "1"
     
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
@@ -146,6 +147,8 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             mime_type = "application/octet-stream"
             file_name = f"{secrets.token_hex(2)}.unknown"
 
+    disposition = "attachment" if force_download else "inline"
+
     return web.Response(
         status=206 if range_header else 200,
         body=body,
@@ -153,7 +156,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Content-Type": f"{mime_type}",
             "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
             "Content-Length": str(req_length),
-            "Content-Disposition": f'inline; filename="{file_name}"',  # inline for streaming
+            "Content-Disposition": f'{disposition}; filename="{file_name}"',  # inline for streaming
             "Accept-Ranges": "bytes",
             # CORS headers for JSMKV
             "Access-Control-Allow-Origin": "*",

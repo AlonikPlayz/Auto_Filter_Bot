@@ -209,7 +209,8 @@ async def next_page(bot, query):
                        InlineKeyboardButton(
                            "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                        InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                           InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
 
                    ]
                    )
@@ -229,7 +230,8 @@ async def next_page(bot, query):
         btn.insert(0, [
             InlineKeyboardButton(
                 "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
-            InlineKeyboardButton("Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+            InlineKeyboardButton("Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+            InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
         ])
     if ULTRA_FAST_MODE:
         if 0 < offset <= 10:
@@ -529,7 +531,8 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
                        InlineKeyboardButton(
                            "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                        InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                           InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
                    ])
     else:
         btn = []
@@ -548,7 +551,8 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
                        InlineKeyboardButton(
                            "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                        InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                           InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
 
                    ])
     if offset != "":
@@ -687,7 +691,8 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
                        InlineKeyboardButton(
                            "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                        InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                           InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
                    ]
                    )
     else:
@@ -706,7 +711,8 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
                        InlineKeyboardButton(
                            "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                        InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                           InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
                    ])
     if offset != "":
         try:
@@ -839,6 +845,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton(
                 "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
             InlineKeyboardButton("Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+            InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
         ],
     )
     if n_offset != "":
@@ -938,8 +945,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except Exception as e:
             logger.exception(e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
-
-
 
     elif query.data.startswith("autofilter_delete"):
         await Media.collection.drop()
@@ -1198,7 +1203,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             log_msg = await client.send_cached_media(chat_id=BIN_CHANNEL, file_id=file_id,)
             fileName = quote_plus(get_name(log_msg))
             dreamx_stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-            dreamx_download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+            dreamx_download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}&dl=1"
             await query.answer(MSG_ALRT)
             await asyncio.sleep(1)
             await log_msg.reply_text(
@@ -1638,7 +1643,8 @@ async def auto_filter(client, msg, spoll=False):
                            InlineKeyboardButton(
                                "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                            InlineKeyboardButton(
-                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                               InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
 
                        ])
         else:
@@ -1658,7 +1664,8 @@ async def auto_filter(client, msg, spoll=False):
                            InlineKeyboardButton(
                                "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium", style=enums.ButtonStyle.PRIMARY),
                            InlineKeyboardButton(
-                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS)
+                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}", style=enums.ButtonStyle.SUCCESS),
+                               InlineKeyboardButton("🔎 Rᴇǫᴜᴇꜱᴛ", url=f"https://t.me/{temp.U_NAME}?start=reqfile_{key}")
                        ])
 
         if offset != "":
@@ -1868,4 +1875,3 @@ async def advantage_spell_chok(client, message):
         await message.delete()
     except Exception:
         pass
-    

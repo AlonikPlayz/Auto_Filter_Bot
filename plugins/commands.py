@@ -7,7 +7,7 @@ import asyncio
 import string
 import sys
 import pytz
-from .pmfilter import auto_filter 
+from .pmfilter import auto_filter, FRESH
 from Script import script
 from datetime import datetime, timedelta
 from database.refer import referdb
@@ -25,7 +25,7 @@ from info import (
     LOG_CHANNEL, SHORTENER_API, SHORTENER_API2, SHORTENER_API3, SHORTENER_WEBSITE, SHORTENER_WEBSITE2, SHORTENER_WEBSITE3,
     
 )
-from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename, get_random_mix_id
+from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename, get_random_mix_id, send_movie_request
 
 logger = logging.getLogger(__name__)
 
@@ -237,6 +237,44 @@ async def start(client, message):
             )
             return  
 
+        if len(message.command) == 2 and message.command[1].startswith("reqfile_"):
+            key = message.command[1].split("_", 1)[1]
+            suggested = FRESH.get(key)
+            prompt_text = "<b>📝 sᴇɴᴅ ᴍᴇ ᴛʜᴇ ᴍᴏᴠɪᴇ/sᴇʀɪᴇs ɴᴀᴍᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇǫᴜᴇsᴛ.</b>"
+            if suggested:
+                prompt_text += f"\n\n<i>(ʏᴏᴜ sᴇᴀʀᴄʜᴇᴅ ꜰᴏʀ: <code>{suggested}</code>)</i>"
+            await message.reply_text(prompt_text)
+            try:
+                reply = await client.listen(chat_id=message.chat.id, user_id=message.from_user.id, timeout=120)
+            except asyncio.TimeoutError:
+                await message.reply_text("<b>⌛ ʀᴇǫᴜᴇsᴛ ᴛɪᴍᴇᴅ ᴏᴜᴛ. ꜱᴇɴᴅ /request ᴀɢᴀɪɴ ɪꜰ ʏᴏᴜ sᴛɪʟʟ ᴡᴀɴᴛ ᴛᴏ ʀᴇǫᴜᴇsᴛ ꜱᴏᴍᴇᴛʜɪɴɢ.</b>")
+                return
+            content = (reply.text or reply.caption or "").strip()
+            if len(content) < 3:
+                await reply.reply_text("<b>ʏᴏᴜ ᴍᴜꜱᴛ ᴛʏᴘᴇ ᴀᴛ ʟᴇᴀꜱᴛ 3 ᴄʜᴀʀᴀᴄᴛᴇʀꜱ. ꜱᴇɴᴅ /request ᴛᴏ ᴛʀʏ ᴀɢᴀɪɴ.</b>")
+                return
+            reported_post, invite_link = await send_movie_request(
+                bot=client,
+                user_id=message.from_user.id,
+                mention=message.from_user.mention,
+                content=content,
+            )
+            if reported_post is None:
+                await reply.reply_text("<b>⚠️ ꜱᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ. ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ.</b>")
+                return
+            if invite_link:
+                btn = [[
+                    InlineKeyboardButton('ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ', url=invite_link),
+                    InlineKeyboardButton('ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ', url=reported_post.link)
+                ]]
+                await reply.reply_text(
+                    "<b>ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ʜᴀꜱ ʙᴇᴇɴ ᴀᴅᴅᴇᴅ! ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ꜱᴏᴍᴇ ᴛɪᴍᴇ.\n\nᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ & ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ.</b>",
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
+            else:
+                await reply.reply_text("<b>ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ʜᴀꜱ ʙᴇᴇɴ ᴀᴅᴅᴇᴅ! ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ꜱᴏᴍᴇ ᴛɪᴍᴇ.</b>")
+            return
+
         if len(message.command) == 2 and message.command[1].startswith('getfile'):
             movies = message.command[1].split("-", 1)[1] 
             movie = movies.replace('-',' ')
@@ -252,15 +290,10 @@ async def start(client, message):
             grp_id = 0
             file_id = data
 
+        # `file_id` was already correctly parsed above from the plain
+        # "file_{grp_id}_{file_id}" payload — it is a real, usable Telegram
+        # file_id, not a base64-wrapped blob. Do not re-decode it.
         decoded_file_id = file_id
-        if not data.startswith("allfiles"):
-            try:
-                raw = base64.urlsafe_b64decode(file_id + "=" * (-len(file_id) % 4))
-                sep = raw.find(b"_")
-                if sep != -1:
-                    decoded_file_id = raw[sep + 1:].decode("latin1")
-            except Exception:
-                pass
 
         file_details_task = asyncio.create_task(get_file_details(decoded_file_id))
         if not await db.has_premium_access(message.from_user.id): 
@@ -388,11 +421,8 @@ async def start(client, message):
 
         settings = await get_settings(int(grp_id))
         if not files_:
-            raw = base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))
-            sep = raw.find(b"_")
-            if sep == -1:
-                raise ValueError("Invalid encoded data")
-            file_id = raw[sep + 1:].decode("latin1")
+            # file_id is already the correct, plain Telegram file_id parsed
+            # from the start payload above — nothing further to decode here.
             try:
                 cover = None
                 if COVERX:

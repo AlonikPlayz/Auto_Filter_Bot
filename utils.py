@@ -3,10 +3,10 @@ import re
 import os
 import random
 import string
-from info import ULTRA_FAST_MODE, MAX_LIST_ELM, BAD_WORDS, LONG_IMDB_DESCRIPTION, IS_VERIFY, MAX_B_TN, TUTORIAL, TUTORIAL_2, TUTORIAL_3, LOG_CHANNEL, TMDB_ON_SEARCH
+from info import ULTRA_FAST_MODE, MAX_LIST_ELM, BAD_WORDS, LONG_IMDB_DESCRIPTION, IS_VERIFY, MAX_B_TN, TUTORIAL, TUTORIAL_2, TUTORIAL_3, LOG_CHANNEL, TMDB_ON_SEARCH, REQST_CHANNEL, ADMINS
 from imdbkit import IMDBKit # pyrefly: ignore 
 import asyncio
-from pyrogram.types import Message, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired
 from pyrogram import enums
 from typing import Union
@@ -57,6 +57,58 @@ class temp(object):
     VERIFICATIONS = {}
     TEMP_INVITE_LINKS = {}
     REQ_LINKS = {}
+
+
+async def send_movie_request(bot, user_id: int, mention: str, content: str, msg_link: str = None):
+    """
+    Posts a movie/file request (e.g. from the "🔎 Request" button on search
+    results, or from the /request command) to REQST_CHANNEL, falling back to
+    ADMINS if that isn't set or sending to it fails.
+
+    Returns (reported_post, invite_link) — either may be None on failure.
+    """
+    reporter = str(user_id)
+    reported_post = None
+    try:
+        btn_row = []
+        if msg_link:
+            btn_row.append(InlineKeyboardButton('VIEW REQUEST', url=msg_link))
+        btn_row.append(InlineKeyboardButton('SHOW OPTIONS', callback_data=f'show_option#{reporter}'))
+        btn = [btn_row]
+        req_text = (
+            f"<b>📝 ʀᴇǫᴜᴇꜱᴛ : <u>{content}</u>\n\n"
+            f"📚 ʀᴇᴘᴏʀᴛᴇᴅ ʙʏ : {mention}\n"
+            f"📖 ʀᴇᴘᴏʀᴛᴇʀ ɪᴅ : {reporter}\n\n</b>"
+        )
+        warning_text = "<b>⚠️ ʀᴇǫᴜᴇꜱᴛ ᴄʜᴀɴɴᴇʟ ɪꜱ ɴᴏᴛ ꜱᴇᴛ.</b>"
+        if REQST_CHANNEL is not None:
+            try:
+                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
+            except Exception:
+                for admin in ADMINS:
+                    await bot.send_message(chat_id=admin, text=warning_text)
+                    reported_post = await bot.send_message(chat_id=admin, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
+        else:
+            for admin in ADMINS:
+                await bot.send_message(chat_id=admin, text=warning_text)
+                reported_post = await bot.send_message(chat_id=admin, text=req_text, reply_markup=InlineKeyboardMarkup(btn))
+    except Exception:
+        logger.exception("Request failed")
+        return None, None
+
+    invite_link = None
+    if reported_post and REQST_CHANNEL is not None:
+        invite_link = temp.REQ_LINKS.get(REQST_CHANNEL)
+        if not invite_link:
+            try:
+                link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
+                invite_link = link.invite_link
+                temp.REQ_LINKS[REQST_CHANNEL] = invite_link
+            except Exception:
+                logger.exception("Failed to create invite link")
+                invite_link = None
+
+    return reported_post, invite_link
 
 
 async def is_req_subscribed(bot, user_id, rqfsub_channels):

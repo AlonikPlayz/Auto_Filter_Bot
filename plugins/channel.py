@@ -96,8 +96,9 @@ def normalize(s: str) -> str:
     s = NORMALIZE_PATTERN.sub(" ", s)
     return re.sub(r"\s+", " ", s).strip()
 
+IGNORE_WORDS_LOWER = {w.lower() for w in IGNORE_WORDS}
+
 def remove_ignored_words(text: str) -> str:
-    IGNORE_WORDS_LOWER = {w.lower() for w in IGNORE_WORDS}
     return " ".join(word for word in text.split() if word.lower() not in IGNORE_WORDS_LOWER)
 
 def get_qualities(text: str) -> str:
@@ -265,7 +266,7 @@ async def media_handler(bot, message):
         return
 
     try:
-        if await db.movie_update_status(bot.me.id):
+        if await db.movie_update_status(temp.ME):
             await process_and_send_update(bot, media.file_name, media.caption)
     except Exception:
         logger.exception("Error processing media")
@@ -461,7 +462,9 @@ async def update_movie_message(bot, base_name):
                     link_preview_options=LinkPreviewOptions(is_disabled=not LINK_PREVIEW, show_above_text=ABOVE_PREVIEW)
                 )
             return
-        except (MessageIdInvalid, MessageNotModified) as e:
+        except MessageNotModified:
+            pass
+        except MessageIdInvalid as e:
             logger.warning(f"Message update skipped due to error: {e}")
             pass
         except Exception:

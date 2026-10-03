@@ -14,7 +14,7 @@ from database.refer import referdb
 from database.config_db import mdb
 from pyrogram.types import LinkPreviewOptions, InlineKeyboardButton, InlineKeyboardMarkup, Message, ReplyKeyboardMarkup, CopyTextButton
 from pyrogram import Client, filters, enums, StopPropagation
-from pyrogram.errors import FloodWait, UserNotParticipant, ChannelInvalid, PeerIdInvalid, UserIsBlocked, InputUserDeactivated
+from pyrogram.errors import FloodWait, MediaEmpty, UserNotParticipant, ChannelInvalid, PeerIdInvalid, UserIsBlocked, InputUserDeactivated
 from database.ia_filterdb import Media, Media2, get_file_details, unpack_new_file_id, get_bad_files, save_file
 from database.users_chats_db import db
 from info import (
@@ -378,7 +378,7 @@ async def start(client, message):
                 files = temp.GETALL.get(file_id)
                 if not files:
                     return await message.reply('<b><i>ɴᴏ ꜱᴜᴄʜ ꜰɪʟᴇ ᴇxɪꜱᴛꜱ !</b></i>')
-                filesarr = []
+                send_allfiles = []
                 cover = None
                 for file in files:
                     file_id = file.file_id
@@ -399,21 +399,33 @@ async def start(client, message):
                     if f_caption is None:
                         f_caption = f"{clean_filename(files1.file_name)}"
                     btn = await stream_buttons(message.from_user.id, file_id)
-                    msg = await client.send_cached_media(
-                        chat_id=message.from_user.id,
-                        file_id=file_id,
-                        cover=cover,
-                        caption=f_caption,
-                        protect_content=settings.get('file_secure', PROTECT_CONTENT),
-                        reply_markup=InlineKeyboardMarkup(btn)
-                    )
-                    filesarr.append(msg)
+                    if files1.file_type == 'video':
+                        msg = await client.send_video(
+                            chat_id=message.from_user.id,
+                            video=file_id,
+                            caption=f_caption,
+                            video_cover=cover,
+                            protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                            reply_markup=InlineKeyboardMarkup(btn)
+                        )
+                    else:
+                        msg = await client.send_cached_media(
+                            chat_id=message.from_user.id,
+                            file_id=file_id,
+                            caption=f_caption,
+                            protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                            reply_markup=InlineKeyboardMarkup(btn)
+                        )
+                    send_allfiles.append(msg)
                 k = await client.send_message(chat_id=message.from_user.id, text=script.DEL_MSG.format(get_time(DELETE_TIME)), parse_mode=enums.ParseMode.HTML)
 
                 await asyncio.sleep(DELETE_TIME)
-                for x in filesarr:
-                    await x.delete()
+                if send_allfiles:
+                    await client.delete_messages(chat_id=message.from_user.id, message_ids=[x.id for x in send_allfiles])
                 await k.edit_text("<b>ʏᴏᴜʀ ᴀʟʟ ᴠɪᴅᴇᴏꜱ/ꜰɪʟᴇꜱ ᴀʀᴇ ᴅᴇʟᴇᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ !\nᴋɪɴᴅʟʏ ꜱᴇᴀʀᴄʜ ᴀɢᴀɪɴ</b>")
+                return
+            except MediaEmpty:
+                await message.reply('<b>⚠️ ꜰɪʟᴇ ɪꜱ ᴄᴜʀʀᴇɴᴛʟʏ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ!</b>')
                 return
             except Exception as e:
                 logger.exception(e)
@@ -423,17 +435,29 @@ async def start(client, message):
         if not files_:
             file_id = decoded_file_id
             try:
+                details = await get_file_details(file_id)
                 cover = None
-                if COVERX:
-                    details = await get_file_details(file_id)
-                    cover = details[0].cover if details and details[0].cover else None
+                is_video = False
+                if details:
+                    if COVERX:
+                        cover = details[0].cover if details[0].cover else None
+                    is_video = details[0].file_type == 'video'
                 btn = await stream_buttons(message.from_user.id, file_id)
-                msg = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    cover=cover,
-                    file_id=file_id,
-                    protect_content=settings.get('file_secure', PROTECT_CONTENT),
-                    reply_markup=InlineKeyboardMarkup(btn))
+                if is_video:
+                    msg = await client.send_video(
+                        chat_id=message.from_user.id,
+                        video=file_id,
+                        video_cover=cover,
+                        protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
+                else:
+                    msg = await client.send_cached_media(
+                        chat_id=message.from_user.id,
+                        file_id=file_id,
+                        protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
 
                 filetype = msg.media
                 file = getattr(msg, filetype.value)
@@ -453,10 +477,12 @@ async def start(client, message):
                 await msg.delete()
                 await k.edit_text("<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!</b>")
                 return
+            except MediaEmpty:
+                return await message.reply('<b>⚠️ ꜰɪʟᴇ ɪꜱ ᴄᴜʀʀᴇɴᴛʟʏ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ!</b>')
             except Exception as e:
                 logger.exception(e)
                 pass
-            return await message.reply('ɴᴏ ꜱᴜᴄʜ ꜰɪʟᴇ ᴇxɪꜱᴛꜱ !')
+            return await message.reply('<b>❌ ɴᴏ ꜱᴜᴄʜ ꜰɪʟᴇ ᴇxɪꜱᴛꜱ !</b>')
 
         files = files_[0]
         title = clean_filename(files.file_name)
@@ -474,14 +500,23 @@ async def start(client, message):
         if f_caption is None:
             f_caption = clean_filename(files.file_name)
         btn = await stream_buttons(message.from_user.id, file_id)
-        msg = await client.send_cached_media(
-            chat_id=message.from_user.id,
-            file_id=file_id,
-            cover=cover,
-            caption=f_caption,
-            protect_content=settings.get('file_secure', PROTECT_CONTENT),
-            reply_markup=InlineKeyboardMarkup(btn)
-        )
+        if files.file_type == 'video':
+            msg = await client.send_video(
+                chat_id=message.from_user.id,
+                video=file_id,
+                caption=f_caption,
+                video_cover=cover,
+                protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+        else:
+            msg = await client.send_cached_media(
+                chat_id=message.from_user.id,
+                file_id=file_id,
+                caption=f_caption,
+                protect_content=settings.get('file_secure', PROTECT_CONTENT),
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
         
         k = await msg.reply(script.DEL_MSG.format(get_time(DELETE_TIME)), parse_mode=enums.ParseMode.HTML)
         await asyncio.sleep(DELETE_TIME)
@@ -490,6 +525,8 @@ async def start(client, message):
         return
     except StopPropagation:
         raise
+    except MediaEmpty:
+        return await message.reply('<b>⚠️ ꜰɪʟᴇ ɪꜱ ᴄᴜʀʀᴇɴᴛʟʏ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ!</b>')
     except Exception as e:
         logger.exception(f"Error In /start command - {e}")
         pass

@@ -33,13 +33,14 @@ logger = logging.getLogger(__name__)
 
 BUTTONS = LimitedDict(maxsize=200)
 FRESH = LimitedDict(maxsize=200)
+PENDING_NOTIFY = {}
 
 REMOVES_WORDS = {"in", "upload", "series", "full", "horror", "thriller", "mystery", "print", "file"}
 SEARCH_CLEAN_REGEX = re.compile(
     r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)\b",
     re.IGNORECASE
 )
-PREFIX_COMMAND_REGEX = re.compile(r"^[\/,!.\U0001F600-\U000E007F]")PENDING_NOTIFY = {}
+PREFIX_COMMAND_REGEX = re.compile(r"^[\/,!.\U0001F600-\U000E007F]")
 
 SEASON_EPISODE_PATTERN = re.compile(
     r'\bs(?:eason)?\s*0*(\d{1,3})\s*[-–—.,]?\s*(?:episode|epi|eps?|ep|e)\s*[-–—.,]?\s*0*(\d{1,4})\b',

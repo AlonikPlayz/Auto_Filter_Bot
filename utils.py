@@ -116,7 +116,7 @@ async def send_movie_request(bot, user_id: int, mention: str, content: str, msg_
                 logger.exception("Failed to create invite link")
                 invite_link = None
 
-    return reported_post, invite_links
+    return reported_post, invite_link
 
 async def is_req_subscribed(client, user_id, rqfsub_channels):
     btn = []
